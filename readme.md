@@ -1,0 +1,5 @@
+
+ECA Framework
+=============
+
+$ npm test

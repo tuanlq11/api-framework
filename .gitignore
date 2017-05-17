@@ -1,0 +1,11 @@
+# build
+/dist
+/dist-root
+
+# node.js
+node_modules
+
+# sublime text
+*.sublime-workspace
+
+.idea/*
