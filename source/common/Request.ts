@@ -1,12 +1,11 @@
-import { autoInject } from "api-framework/system";
 import { join as pathJoin } from "path";
 import * as request from "request";
 
-const Noop = (...args) => undefined;
+const Noop                  = (...args) => undefined;
 const { DATA_DIR, APP_ENV } = process.env;
-const Config = pathJoin(DATA_DIR, "config." + APP_ENV);
-const Eureka = require(Config).registry.eureka;
-const Gateway = "http://" + Eureka.host + // in case using domain
+const Config                = pathJoin(DATA_DIR, "config." + APP_ENV);
+const Eureka                = require(Config).registry.eureka;
+const Gateway               = "http://" + Eureka.host + // in case using domain
     (!!Eureka.port ? ":" + Eureka.port : "");
 
 /**
@@ -16,16 +15,14 @@ const Gateway = "http://" + Eureka.host + // in case using domain
  * @param success handler for successful call
  * @param error handler for any error occured
  */
-export function ServiceCall(
-    service: string,
-    req: { method: string, uri: string, body?: any, headers?: any },
-    success: Function = Noop, error: Function = Noop
-) {
+export function ServiceCall(service: string,
+                            req: { method: string, uri: string, body?: any, headers?: any },
+                            success: Function = Noop, error: Function = Noop) {
     // for serializable json body
-    var opts: any = Object.assign({ json: true }, req);
-    opts.uri = Gateway + "/" + service + req.uri;
+    const opts: any             = Object.assign({ json: true }, req);
+    opts.uri                    = Gateway + "/" + service + req.uri;
     // create a promise wrapper
-    var promise: Promise<any> = new Promise(
+    const promise: Promise<any> = new Promise(
         (resolve, reject) => {
             request(opts, (err, response) => {
                 if (err) reject(err);
@@ -34,8 +31,12 @@ export function ServiceCall(
         });
 
     promise.then(
-        resp => { if (resp) success(resp); },
-        err => { if (err) error(err); }
+        resp => {
+            if (resp) success(resp);
+        },
+        err => {
+            if (err) error(err);
+        }
     );
 
     return promise;
@@ -50,16 +51,14 @@ export function ServiceCall(
  * @param data result data from the action
  * @param object data object has been carried out (id, type, before)
  * @param success handler for successful call
- * @param error handler for any error occured 
+ * @param error handler for any error occured
  */
-export function Audit(
-    user: string | number, event: string, data: any = {},
-    object: { id: string | number, type: string, before?: any },
-    success: Function = Noop, error: Function = Noop
-) {
+export function Audit(user: string | number, event: string, data: any = {},
+                      object: { id: string | number, type: string, before?: any },
+                      success: Function                               = Noop, error: Function = Noop) {
 
-    var body = { user, event, object, data };
-    var req = { method: "post", uri: "/record", body };
+    const body = { user, event, object, data };
+    const req  = { method: "post", uri: "/record", body };
     // TODO: add headers for required permission
     // TODO: handle requesting error
     return ServiceCall("audit", req, success, error);
