@@ -1,14 +1,15 @@
 'use strict';
 
 function exportAll(module) {
-	for (const name in module) {
-		if (!exports.hasOwnProperty(name)) exports[name] = module[name];
-	}
+    for (const name in module) {
+        if (!exports.hasOwnProperty(name)) exports[name] = module[name];
+    }
 }
 
-const Http = require('./dist/network/Http');
-exports.Http = Http.Http;
+const Http           = require('./dist/source/network/Http');
+exports.Http         = Http.Http;
+exports.HttpMetadata = Http.HttpMetadata;
 
-exportAll(require('./dist/network/Error'));
-exportAll(require('./dist/network/Koa'));
-exportAll(require('./dist/network/Router'));
+exportAll(require('./dist/source/network/Error'));
+exportAll(require('./dist/source/network/Koa'));
+exportAll(require('./dist/source/network/Router'));
