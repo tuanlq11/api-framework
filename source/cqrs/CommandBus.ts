@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as Validator from 'is-my-json-valid';
 
 import { dereference } from 'json-schema-ref-parser';
+import Callback = Command.Callback;
 
 export abstract class CommandBus {
 
@@ -22,7 +23,6 @@ export abstract class CommandBus {
                 const filePath   = path.join(this.schemaPath, type.SCHEMA_FILE);
                 const schema     = await dereference(filePath);
                 worker.validator = Validator(schema, { greedy: true });
-                worker.type      = type;
             }
         }
     }
@@ -30,22 +30,27 @@ export abstract class CommandBus {
     abstract register<T>(type: Command.Static<T>,
                          handler: Command.Handler<T>);
 
-    abstract execute(command: any): Promise<any>;
+    abstract execute(command: any, callback?: Callback): Promise<any>;
 
 }
 
 
-interface Worker {
+export interface Worker {
     readonly handler: Command.Handler<any>;
     type?: Command.Static<any>;
     id?: string;
     validator?: Validator.Func;
+    callbacks?: any,
+    anonymous?: boolean
 }
 
 export class CommandHandlerExisted extends BaseError {
 }
 
 export class CommandHandlerNotFound extends BaseError {
+}
+
+export class CloudCommandHandlerNotFound extends BaseError {
 }
 
 export class CommandValidatorNotFound extends BaseError {

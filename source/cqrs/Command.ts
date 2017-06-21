@@ -11,7 +11,11 @@ export namespace Command {
 
     export interface CloudStatic<T> extends Static<T> {
         readonly ROUTING_KEY: string;
-        readonly HANDLER_NAME: string;
+        readonly HANDLER_NAME?: string;
+    }
+
+    export interface Callback {
+        (error: boolean, msg: string): void
     }
 
 }

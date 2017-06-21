@@ -1,6 +1,9 @@
 const amqp = require('amqp');
 
-import { AMQPClient, AMQPExchange, AMQPQueue, ConnectionOptions, ExchangeOptions, QueueOptions } from 'amqp';
+import {
+    AMQPClient, AMQPExchange, AMQPQueue, ConnectionOptions, ExchangeOptions, ExchangePublishOptions,
+    QueueOptions
+} from 'amqp';
 
 export type ConnectResult = { exchange: AMQPExchange, queue: AMQPQueue, client: AMQPClient };
 
@@ -67,13 +70,13 @@ export class RabbitMQ {
 
     }
 
-    public async publish(routingKey: string, message: any) {
+    public async publish(routingKey: string, message: any, options: ExchangePublishOptions) {
 
         let result: any = null;
 
         await (new Promise((resolve, reject) => {
 
-            this.__exchange.publish(routingKey, message, {}, (err: boolean, msg: string) => {
+            this.__exchange.publish(routingKey, message, options, (err: boolean, msg: string) => {
                 if (err)
                     reject({ err, msg });
                 else
