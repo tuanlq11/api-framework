@@ -198,7 +198,7 @@ export class SchemaCloudBus extends CommandBus {
      * @param timeout
      * @param callback
      */
-    public execute(command: any, callback?: Callback, timeout?: number) {
+    public execute(command: any, callback?: (err: boolean, msg: any) => void, timeout?: number) {
         const { cloud_worker } = this.validate(command);
 
         const type = cloud_worker.type as Command.CloudStatic<any>;

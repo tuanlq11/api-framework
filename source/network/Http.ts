@@ -61,12 +61,12 @@ const HttpMetadata = {
         return Reflect.getMetadata(HTTP_LIST, target);
     },
 
-    actuators: () => {
+    actuators: (appName: string) => {
         const result = {};
 
         for (const path in (global as any).actuators) {
-            const actuator                                                                                            = (global as any).actuators[path];
-            result[`{[${path}],methods=[${actuator.methods.toString()}],produces=[${actuator.produces.toString()}]}`] = {};
+            const actuator                                                                                                                           = (global as any).actuators[path];
+            result[`{[/${appName.toLowerCase().concat(path)}],methods=[${actuator.methods.toString()}],produces=[${actuator.produces.toString()}]}`] = {};
         }
 
         return result;
