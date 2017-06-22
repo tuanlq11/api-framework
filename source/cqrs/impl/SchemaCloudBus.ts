@@ -130,6 +130,10 @@ export class SchemaCloudBus extends CommandBus {
 
         const worker = this.workers.get(payload.handler as any);
 
+        // Define "me" object of this
+        const me                    = { app: context.__appName, handler: (worker || { handler: '' }).handler };
+        const { sender, sessionId } = payload;
+
         try {
 
             if (payload.direction == DIRECTION_ENUM.FALLBACK as any) {
@@ -148,7 +152,7 @@ export class SchemaCloudBus extends CommandBus {
                     const response = await worker.handler(payload.message);
 
                     if (payload.direction == DIRECTION_ENUM.REQUEST as any) {
-                        context.publish(deliveryInfo.routingKey, payload.sessionId, worker.id, payload.sender, response, DIRECTION_ENUM.RESPONSE as any);
+                        context.publish(sender.app, sessionId, me, sender.handler, response, DIRECTION_ENUM.RESPONSE as any);
                     }
 
                     if (payload.direction == DIRECTION_ENUM.RESPONSE as any && worker.callbacks[payload.sessionId]) {
@@ -157,10 +161,7 @@ export class SchemaCloudBus extends CommandBus {
                     }
 
                 } else {
-                    context.publish(deliveryInfo.routingKey, payload.sessionId, "", payload.sender,
-                        { message: 'Command not found' },
-                        DIRECTION_ENUM.FALLBACK as any
-                    );
+                    context.publish(sender.app, sessionId, me, sender.handler, { message: 'Command not found' }, DIRECTION_ENUM.FALLBACK as any);
                 }
             }
         } finally {
@@ -223,15 +224,11 @@ export class SchemaCloudBus extends CommandBus {
 
         }
 
+        const me      = { app: this.__appName, handler: cloud_worker.id as string };
+        const handler = this.hash(type.HANDLER_NAME.toLowerCase());
+
         // Push to Cloud
-        return this.publish(
-            type.ROUTING_KEY,
-            sessionId,
-            cloud_worker.id as string,
-            this.hash(type.HANDLER_NAME.toLowerCase()),
-            command,
-            DIRECTION_ENUM.REQUEST as any
-        );
+        return this.publish(type.ROUTING_KEY, sessionId, me, handler, command, DIRECTION_ENUM.REQUEST as any);
     }
 
     /**
@@ -268,12 +265,13 @@ export class SchemaCloudBus extends CommandBus {
      * @param direction
      * @returns {Promise<any>}
      */
-    public async publish(routingKey: string, sessionId: string, sender: string, handler: string,
+    public async publish(routingKey: string, sessionId: string, sender: { app: string, handler: string }, handler: string,
                          message: any, direction: Direction): Promise<{ err: any, msg: any }> {
 
         return await this.__rabbitMQ.publish(
             routingKey,
             JSON.stringify({
+
                     sessionId,
                     sender,
                     direction: direction || DIRECTION_ENUM.REQUEST,
@@ -315,7 +313,7 @@ export class SchemaCloudBus extends CommandBus {
 }
 
 export interface Payload {
-    sender: string,
+    sender: { app: string, handler: string },
     direction: Direction,
     handler: string,
     sessionId: string,
