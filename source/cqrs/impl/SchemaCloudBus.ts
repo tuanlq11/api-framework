@@ -1,4 +1,4 @@
-import { RabbitMQ } from '../../common/RabbitMQ';
+import { QueueConfig, RabbitMQ } from '../../common/RabbitMQ';
 import { randomBytes, createHash } from 'crypto';
 
 import { AMQPClient, AMQPExchange, AMQPQueue, ConnectionOptions, ExchangeOptions, QueueOptions } from 'amqp';
@@ -20,12 +20,18 @@ import Callback = Command.Callback;
 
 export class SchemaCloudBus extends CommandBus {
 
-    private __rabbitMQ: RabbitMQ;
-
+    private __id: string;
     private __appName: string;
+    private __uniqueName: string;
+
+    private __rabbitMQ: RabbitMQ;
     private __exchangeName: string;
 
     protected readonly cloud_workers = new Map<any, Worker>();
+
+    constructor() {
+        super();
+    }
 
     /**
      * Get worker by name | type
@@ -80,7 +86,9 @@ export class SchemaCloudBus extends CommandBus {
      */
     async load(config: any) {
 
+        this.__id           = this.generateId();
         this.__appName      = config.registry.instance.app || 'Eureka-'.concat(await randomBytes(16).toString('hex'));
+        this.__uniqueName   = this.__appName.concat(':', this.__id).toLowerCase();
         this.__exchangeName = config.get('bus.exchange');
 
         const type = config.get('bus.type') || 'direct';
@@ -93,7 +101,11 @@ export class SchemaCloudBus extends CommandBus {
         await this.connectCloud(
             this.__appName, this.__exchangeName,
             { host, port, login, passowrd },
-            { durable: true, type }, { durable: true }
+            { durable: true, type },
+            [
+                { name: this.__appName, routingKey: this.__appName, options: { durable: true } },
+                { name: this.__uniqueName, routingKey: this.__uniqueName, options: { durable: false } },
+            ]
         );
 
     }
@@ -105,12 +117,13 @@ export class SchemaCloudBus extends CommandBus {
      * @param exchangeName
      * @param connectionOptions
      * @param exchangeOptions
-     * @param queueOptions
+     * @param queueConfigs
      * @returns {Promise<void>}
      */
     async connectCloud(appName, exchangeName, connectionOptions: ConnectionOptions,
-                       exchangeOptions: ExchangeOptions, queueOptions: QueueOptions): Promise<void> {
-        this.__rabbitMQ = new RabbitMQ(appName, exchangeName, connectionOptions, exchangeOptions, queueOptions);
+                       exchangeOptions: ExchangeOptions, queueConfigs: QueueConfig[]): Promise<void> {
+
+        this.__rabbitMQ = new RabbitMQ(appName, exchangeName, connectionOptions, exchangeOptions, queueConfigs);
         await this.__rabbitMQ.connect(await this.onMessage.bind({ workers: this.cloud_workers, context: this }));
 
     }
@@ -131,11 +144,16 @@ export class SchemaCloudBus extends CommandBus {
         const worker = this.workers.get(payload.handler as any);
 
         // Define "me" object of this
-        const me                    = { app: context.__appName, handler: (worker || { handler: '' }).handler };
+        const me: Me                = {
+            app:        context.__appName,
+            uniqueName: this.__uniqueName,
+            handler:    (worker || { handler: '' }).handler as string
+        };
         const { sender, sessionId } = payload;
 
         try {
 
+            // FALLBACK message
             if (payload.direction == DIRECTION_ENUM.FALLBACK as any) {
 
                 if (worker && worker.callbacks[payload.sessionId]) {
@@ -151,17 +169,19 @@ export class SchemaCloudBus extends CommandBus {
                 if (worker) {
                     const response = await worker.handler(payload.message);
 
+                    // REQUEST message
                     if (payload.direction == DIRECTION_ENUM.REQUEST as any) {
-                        context.publish(sender.app, sessionId, me, sender.handler, response, DIRECTION_ENUM.RESPONSE as any);
+                        context.publish(sender.uniqueName, sessionId, me, sender.handler, response, DIRECTION_ENUM.RESPONSE as any);
                     }
 
+                    // RESPONSE message
                     if (payload.direction == DIRECTION_ENUM.RESPONSE as any && worker.callbacks[payload.sessionId]) {
                         worker.callbacks[payload.sessionId](false, payload.message);
                         delete worker.callbacks[payload.sessionId];
                     }
 
                 } else {
-                    context.publish(sender.app, sessionId, me, sender.handler, { message: 'Command not found' }, DIRECTION_ENUM.FALLBACK as any);
+                    context.publish(sender.uniqueName, sessionId, me, sender.handler, { message: 'Command not found' }, DIRECTION_ENUM.FALLBACK as any);
                 }
             }
         } finally {
@@ -183,7 +203,7 @@ export class SchemaCloudBus extends CommandBus {
         if (this.workers.has(type)) throw new CommandHandlerExisted();
 
         const id     = this.generateWorkerName(type);
-        const worker = { handler, id, type, callbacks: {} };
+        const worker = { id, type, handler, callbacks: {} };
 
         // Register with command queue
         this.workers.set(type, worker);
@@ -213,18 +233,20 @@ export class SchemaCloudBus extends CommandBus {
             if (cloud_worker.anonymous) {
                 this.cloud_workers.set(cloud_worker.id, cloud_worker);
             }
+
             setTimeout((() => {
                 if (cloud_worker.callbacks[sessionId]) {
                     cloud_worker.callbacks[sessionId](true, 'timeout');
                     delete cloud_worker.callbacks[sessionId];
                 }
 
+                // Remove anonymous-handler after it received response
                 if (cloud_worker.anonymous) this.cloud_workers.delete(cloud_worker.id);
             }), timeout || 10000);
 
         }
 
-        const me      = { app: this.__appName, handler: cloud_worker.id as string };
+        const me      = { app: this.__appName, uniqueName: this.__uniqueName, handler: cloud_worker.id as string };
         const handler = this.hash(type.HANDLER_NAME.toLowerCase());
 
         // Push to Cloud
@@ -265,23 +287,13 @@ export class SchemaCloudBus extends CommandBus {
      * @param direction
      * @returns {Promise<any>}
      */
-    public async publish(routingKey: string, sessionId: string, sender: { app: string, handler: string }, handler: string,
+    public async publish(routingKey: string, sessionId: string, sender: Me, handler: string,
                          message: any, direction: Direction): Promise<{ err: any, msg: any }> {
 
         return await this.__rabbitMQ.publish(
             routingKey,
-            JSON.stringify({
-
-                    sessionId,
-                    sender,
-                    direction: direction || DIRECTION_ENUM.REQUEST,
-                    handler,
-                    message
-                }
-            ),
-            {
-                appId: this.__appName
-            }
+            JSON.stringify({ sessionId, sender, direction, handler, message }),
+            { appId: this.__appName }
         );
     }
 
@@ -313,11 +325,17 @@ export class SchemaCloudBus extends CommandBus {
 }
 
 export interface Payload {
-    sender: { app: string, handler: string },
+    sender: Me,
     direction: Direction,
     handler: string,
     sessionId: string,
     message: any
+}
+
+export interface Me {
+    app: string,
+    uniqueName: string,
+    handler: string
 }
 
 export type Direction = 'request' | 'response' | 'fallback'
