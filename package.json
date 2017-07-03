@@ -38,6 +38,6 @@
     "chai": "3.5",
     "mocha": "3.1",
     "supertest": "2.0",
-    "typescript": "2.1"
+    "typescript": "2.2"
   }
 }
