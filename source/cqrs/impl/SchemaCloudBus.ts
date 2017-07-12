@@ -104,7 +104,7 @@ export class SchemaCloudBus extends CommandBus {
             { durable: true, type },
             [
                 { name: this.__appName, routingKey: this.__appName, options: { durable: true } },
-                { name: this.__uniqueName, routingKey: this.__uniqueName, options: { durable: false } },
+                { name: this.__uniqueName, routingKey: this.__uniqueName, options: { durable: true } },
             ]
         );
 
