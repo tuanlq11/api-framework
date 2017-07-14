@@ -7,7 +7,6 @@ import {
     CommandBus,
     CommandHandlerExisted,
     CommandHandlerNotFound,
-    CommandValidatorNotFound,
     Worker
 } from "../CommandBus";
 
@@ -16,6 +15,7 @@ import { convert } from './SchemaUtil';
 
 import { InvalidCommand } from '../InvalidCommand';
 import * as uuid from 'uuid';
+
 import Callback = Command.Callback;
 
 export class SchemaCloudBus extends CommandBus {
@@ -23,6 +23,7 @@ export class SchemaCloudBus extends CommandBus {
     private __id: string;
     private __appName: string;
     private __uniqueName: string;
+    private __zone: string;
 
     private __rabbitMQ: RabbitMQ;
     private __exchangeName: string;
@@ -88,15 +89,9 @@ export class SchemaCloudBus extends CommandBus {
 
         this.__id = this.generateId();
 
-        this.__appName =
-            config.registry.instance.app.concat(
-                '-',
-                config.registry.configuration.label || 'global'
-            )
-            ||
-            ('Eureka-' + this.generateId())
-        ;
+        this.__zone = config.registry.configuration.label || 'global';
 
+        this.__appName = SchemaCloudBus.formatAppName(config.registry.instance.app, this.__zone);
 
         this.__uniqueName = this.__appName.concat(':', this.__id).toLowerCase();
 
@@ -261,7 +256,13 @@ export class SchemaCloudBus extends CommandBus {
         const handler = this.hash(type.HANDLER_NAME.toLowerCase());
 
         // Push to Cloud
-        return this.publish(type.ROUTING_KEY, sessionId, me, handler, command, DIRECTION_ENUM.REQUEST as any);
+        return this.publish(
+            SchemaCloudBus.formatAppName(type.ROUTING_KEY, this.__zone),
+            sessionId,
+            me,
+            handler,
+            command, DIRECTION_ENUM.REQUEST as any
+        );
     }
 
     /**
@@ -296,7 +297,7 @@ export class SchemaCloudBus extends CommandBus {
      * @param handler
      * @param message
      * @param direction
-     * @returns {Promise<any>}
+     * @returns {Promise<{err, msg }>}
      */
     public async publish(routingKey: string, sessionId: string, sender: Me, handler: string,
                          message: any, direction: Direction): Promise<{ err: any, msg: any }> {
@@ -331,6 +332,17 @@ export class SchemaCloudBus extends CommandBus {
      */
     private generateId() {
         return uuid.v4()
+    }
+
+    /**
+     * Format appName pattern
+     *
+     * @param appName
+     * @param zone
+     * @returns {string}
+     */
+    public static formatAppName(appName: string, zone: string) {
+        return appName.concat('-', zone);
     }
 
 }
