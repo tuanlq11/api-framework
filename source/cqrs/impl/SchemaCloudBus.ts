@@ -86,9 +86,20 @@ export class SchemaCloudBus extends CommandBus {
      */
     async load(config: any) {
 
-        this.__id           = this.generateId();
-        this.__appName      = config.registry.instance.app || 'Eureka-'.concat(await randomBytes(16).toString('hex'));
-        this.__uniqueName   = this.__appName.concat(':', this.__id).toLowerCase();
+        this.__id = this.generateId();
+
+        this.__appName =
+            config.registry.instance.app.concat(
+                '-',
+                config.registry.configuration.label || 'global'
+            )
+            ||
+            ('Eureka-' + this.generateId())
+        ;
+
+
+        this.__uniqueName = this.__appName.concat(':', this.__id).toLowerCase();
+
         this.__exchangeName = config.get('bus.exchange');
 
         const type = config.get('bus.type') || 'direct';
