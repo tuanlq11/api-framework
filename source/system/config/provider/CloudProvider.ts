@@ -134,7 +134,7 @@ export class CloudProvider implements ConfigProviderImpl {
     }
 
     private parse(body: any[]) {
-        for (const record of body) {
+        for (const record of body.reverse()) {
             const { source } = record;
             for (const key in source) {
                 _.extend_x(this.content, this.parseRecur(key.split('.'), source[key], 0));
