@@ -3,15 +3,19 @@
 
 import * as path from "path";
 import { ConfigProviderImpl } from "../ConfigProviderImpl";
+import { JsonLogger } from "../../impl/JsonLogger";
 
 const _ = require('underscore-x');
 
 export class EnvironmentProvider implements ConfigProviderImpl {
 
-    private content: any = {};
+    private readonly logger: JsonLogger = new JsonLogger();
+    private content: any                = {};
 
     async load() {
+        this.logger.info(`Fetching environment configuration`);
         this.parse(process.env);
+        this.logger.info(`Fetched environment configuration`);
     }
 
     exists(key: string): boolean {

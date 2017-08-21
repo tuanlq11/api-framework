@@ -19,7 +19,7 @@ export class CloudProvider implements ConfigProviderImpl {
 
     async load() {
 
-        this.logger.info(`Fetching configuration from ${this.url.href}`);
+        this.logger.info(`Fetching cloud configuration from ${this.url.href}`);
 
         return await (new Promise((resolve, reject) => {
             HTTP.request({
@@ -45,14 +45,17 @@ export class CloudProvider implements ConfigProviderImpl {
                     try {
                         const body = JSON.parse(response);
                         this.parse(body.propertySources);
-                        this.logger.info('Fetch config is successful!');
+                        this.logger.info('Fetched cloud configuration');
                         resolve(this);
                     } catch (e) {
                         this.logger.error(e);
-                        resolve(e);
+                        resolve();
                     }
                 });
 
+            }).on('error', (e) => {
+                this.logger.error(e);
+                resolve();
             }).end();
         }));
 

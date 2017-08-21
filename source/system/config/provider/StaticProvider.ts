@@ -3,10 +3,13 @@
 
 import * as path from "path";
 import { ConfigProviderImpl } from "../ConfigProviderImpl";
+import { JsonLogger } from "../../impl/JsonLogger";
 
 const _ = require('underscore-x');
 
 export class StaticProvider implements ConfigProviderImpl {
+
+    private readonly logger: JsonLogger = new JsonLogger();
 
     private source: StaticSource;
     private path: string;
@@ -14,7 +17,9 @@ export class StaticProvider implements ConfigProviderImpl {
     private content: any = {};
 
     async load() {
+        this.logger.info(`Fetching static configuration from ${this.path}`);
         this.content = require(this.path);
+        this.logger.info(`Fetched static configuration`);
         for (const key in this.content) {
             Object.defineProperty(this, key, {
                 get: () => {
