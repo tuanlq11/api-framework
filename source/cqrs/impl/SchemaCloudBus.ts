@@ -91,18 +91,18 @@ export class SchemaCloudBus extends CommandBus {
 
         this.__zone = config.registry.configuration.label || 'global';
 
-        this.__appName = SchemaCloudBus.formatAppName(config.registry.instance.app, this.__zone);
+        this.__appName = SchemaCloudBus.formatAppName(config.name, this.__zone);
 
         this.__uniqueName = this.__appName.concat(':', this.__id).toLowerCase();
 
-        this.__exchangeName = config.get('bus.exchange');
+        this.__exchangeName = config.bus.exchange;
 
-        const type = config.get('bus.type') || 'direct';
+        const type = config.bus.type || 'direct';
 
-        const host     = config.get('spring.rabbitmq.host');
-        const port     = config.get('spring.rabbitmq.port');
-        const login    = config.get('spring.rabbitmq.username');
-        const passowrd = config.get('spring.rabbitmq.password');
+        const host     = config.spring.rabbitmq.host;
+        const port     = config.spring.rabbitmq.port;
+        const login    = config.spring.rabbitmq.username;
+        const passowrd = config.spring.rabbitmq.password;
 
         await this.connectCloud(
             this.__appName, this.__exchangeName,

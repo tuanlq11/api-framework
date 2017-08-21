@@ -15,3 +15,5 @@ exportAll(require('./dist/source/system/Util'));
 
 exportAll(require('./dist/source/system/impl/JsonLogger'));
 exportAll(require('./dist/source/system/impl/TextLogger'));
+
+exportAll(require('./dist/source/system/config/ConfigFactory'));

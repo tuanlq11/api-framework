@@ -7,3 +7,5 @@ export * from './source/system/Util';
 
 export * from './source/system/impl/JsonLogger';
 export * from './source/system/impl/TextLogger';
+
+export * from './source/system/config/ConfigFactory';
