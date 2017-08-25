@@ -4,6 +4,7 @@ import { StaticProvider } from "./provider/StaticProvider";
 import { CloudProvider } from "./provider/CloudProvider";
 import { ConfigProviderImpl } from "./ConfigProviderImpl";
 import { EnvironmentProvider } from "./provider/EnvironmentProvider";
+import { DefaultProvider } from "./provider/DefaultProvider";
 
 const _ = require('underscore-x');
 
@@ -11,6 +12,7 @@ export class ConfigFactory {
 
     private static singleton: ConfigSingleton;
     private static providers = [
+        new DefaultProvider(),
         new EnvironmentProvider(),
         new StaticProvider(),
         new CloudProvider(),

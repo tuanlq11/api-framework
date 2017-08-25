@@ -1,7 +1,6 @@
 "use strict";
 
 
-import * as path from "path";
 import { ConfigProviderImpl } from "../ConfigProviderImpl";
 import { JsonLogger } from "../../impl/JsonLogger";
 
