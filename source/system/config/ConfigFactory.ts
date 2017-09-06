@@ -16,6 +16,7 @@ export class ConfigFactory {
         new EnvironmentProvider(),
         new StaticProvider(),
         new CloudProvider(),
+        new StaticProvider()
     ];
 
     static async build(): Promise<ConfigSingleton> {
