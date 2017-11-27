@@ -102,11 +102,11 @@ export class SchemaCloudBus extends CommandBus {
         const host     = config.spring.rabbitmq.host;
         const port     = config.spring.rabbitmq.port;
         const login    = config.spring.rabbitmq.username;
-        const passowrd = config.spring.rabbitmq.password;
+        const password = config.spring.rabbitmq.password;
 
         await this.connectCloud(
             this.__appName, this.__exchangeName,
-            { host, port, login, passowrd },
+            { host, port, login, password },
             { durable: true, type },
             [
                 { name: this.__appName, routingKey: this.__appName, options: { durable: true } },
@@ -143,7 +143,7 @@ export class SchemaCloudBus extends CommandBus {
      * @param messageObject
      * @returns {Promise<void>}
      */
-    private async  onMessage(message, header, deliveryInfo, messageObject) {
+    private async onMessage(message, header, deliveryInfo, messageObject) {
         const payload: Payload = JSON.parse(message.data.toString('utf8'));
         const context          = (this as any).context;
 
@@ -362,4 +362,5 @@ export interface Me {
 }
 
 export type Direction = 'request' | 'response' | 'fallback'
+
 export enum DIRECTION_ENUM { REQUEST = 'request' as any, RESPONSE = 'response' as any, FALLBACK = 'fallback' as any}
