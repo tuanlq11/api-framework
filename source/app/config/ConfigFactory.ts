@@ -2,7 +2,7 @@
 
 import { StaticProvider } from "./provider/StaticProvider";
 import { CloudProvider } from "./provider/CloudProvider";
-import { ConfigProviderImpl } from "./ConfigProviderImpl";
+import { ConfigProviderContract } from "./ConfigProviderContract";
 import { EnvironmentProvider } from "./provider/EnvironmentProvider";
 import { DefaultProvider } from "./provider/DefaultProvider";
 
@@ -26,7 +26,7 @@ export class ConfigFactory {
             const instance: ConfigSingleton = { get: undefined, content: {} };
 
             for (const provider of this.providers) {
-                (provider as ConfigProviderImpl).setSource(instance.content);
+                (provider as ConfigProviderContract).setSource(instance.content);
                 await provider.load();
                 _.extend_x(instance.content, provider.getContent());
             }

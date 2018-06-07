@@ -2,12 +2,12 @@
 
 
 import * as path from "path";
-import { ConfigProviderImpl } from "../ConfigProviderImpl";
-import { JsonLogger } from "../../impl/JsonLogger";
+import { ConfigProviderContract } from "../ConfigProviderContract";
+import { JsonLogger } from "../../../system/impl/JsonLogger";
 
 const _ = require('underscore-x');
 
-export class StaticProvider implements ConfigProviderImpl {
+export class StaticProvider implements ConfigProviderContract {
 
     private readonly logger: JsonLogger = new JsonLogger();
 

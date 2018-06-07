@@ -1,9 +1,9 @@
 "use strict";
 
-export interface ConfigProviderImpl {
+export interface ConfigProviderContract {
     load();
     exists(key: string): boolean;
     getPath(): string | undefined;
     getContent(): any;
-    setSource(config: any): ConfigProviderImpl;
+    setSource(config: any): ConfigProviderContract;
 }

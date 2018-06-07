@@ -1,10 +1,10 @@
 'use strict';
 
-import { ConfigProviderImpl } from "../ConfigProviderImpl";
+import { ConfigProviderContract } from "../ConfigProviderContract";
 
 const _ = require('underscore-x');
 
-export class DefaultProvider implements ConfigProviderImpl {
+export class DefaultProvider implements ConfigProviderContract {
 
     private content: any;
 
@@ -37,7 +37,7 @@ export class DefaultProvider implements ConfigProviderImpl {
         return this.content;
     }
 
-    setSource(config: any): ConfigProviderImpl {
+    setSource(config: any): ConfigProviderContract {
         return this;
     }
 }

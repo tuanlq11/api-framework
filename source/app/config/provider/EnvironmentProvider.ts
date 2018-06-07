@@ -1,15 +1,15 @@
 "use strict";
 
 
-import { ConfigProviderImpl } from "../ConfigProviderImpl";
-import { JsonLogger } from "../../impl/JsonLogger";
+import { ConfigProviderContract } from "../ConfigProviderContract";
+import { JsonLogger } from "../../../system/impl/JsonLogger";
 
 const _ = require('underscore-x');
 
-export class EnvironmentProvider implements ConfigProviderImpl {
+export class EnvironmentProvider implements ConfigProviderContract {
 
     private readonly logger: JsonLogger = new JsonLogger();
-    private content: any                = {};
+    private content: any = {};
 
     async load() {
         this.logger.info(`Fetching environment configuration`);
@@ -37,7 +37,7 @@ export class EnvironmentProvider implements ConfigProviderImpl {
 
         if (kArr.length === 0) return value;
 
-        const key   = kArr[0].toLowerCase();
+        const key = kArr[0].toLowerCase();
         const kArrN = kArr.slice(1);
 
         let result = {};
@@ -50,7 +50,7 @@ export class EnvironmentProvider implements ConfigProviderImpl {
     private parse(data: any) {
         for (const key in data) {
             const kArr = key.split('_');
-            const val  = process.env[key];
+            const val = process.env[key];
             if (val === undefined || kArr[0] !== 'APP') continue;
 
             _.extend_x(this.content, this.parseRecur(kArr.slice(1), val))
