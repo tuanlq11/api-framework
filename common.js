@@ -6,7 +6,7 @@ function exportAll(module) {
     }
 }
 
-exportAll(require('./dist/source/common/Mailer'));
-exportAll(require('./dist/source/common/PasswordEncoder'));
-exportAll(require('./dist/source/common/PDFHelper'));
-exportAll(require('./dist/source/common/RabbitMQ'));
+exportAll(require('./dist/common/Mailer'));
+exportAll(require('./dist/common/PasswordEncoder'));
+exportAll(require('./dist/common/PDFHelper'));
+exportAll(require('./dist/common/RabbitMQ'));

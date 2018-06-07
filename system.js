@@ -6,17 +6,17 @@ function exportAll(module) {
     }
 }
 
-exportAll(require('./dist/source/system/BaseError'));
-exportAll(require('./dist/source/system/Injection'));
-exportAll(require('./dist/source/system/Logger'));
-exportAll(require('./dist/source/system/Retry'));
-exportAll(require('./dist/source/system/Storage'));
-exportAll(require('./dist/source/system/Util'));
+exportAll(require('./dist/system/BaseError'));
+exportAll(require('./dist/system/Injection'));
+exportAll(require('./dist/system/Logger'));
+exportAll(require('./dist/system/Retry'));
+exportAll(require('./dist/system/Storage'));
+exportAll(require('./dist/system/Util'));
 
-exportAll(require('./dist/source/system/impl/JsonLogger'));
-exportAll(require('./dist/source/system/impl/TextLogger'));
+exportAll(require('./dist/system/impl/JsonLogger'));
+exportAll(require('./dist/system/impl/TextLogger'));
 
-exportAll(require('./dist/source/system/EurekaClient'));
+exportAll(require('./dist/system/EurekaClient'));
 
-exportAll(require('./dist/source/system/config/ConfigFactory'));
-exportAll(require('./dist/source/system/config/ConfigImpl'));
+exportAll(require('./dist/system/config/ConfigFactory'));
+exportAll(require('./dist/system/config/ConfigImpl'));

@@ -6,10 +6,10 @@ function exportAll(module) {
     }
 }
 
-const Http           = require('./dist/source/network/Http');
+const Http           = require('./dist/network/Http');
 exports.Http         = Http.Http;
 exports.HttpMetadata = Http.HttpMetadata;
 
-exportAll(require('./dist/source/network/Error'));
-exportAll(require('./dist/source/network/Koa'));
-exportAll(require('./dist/source/network/Router'));
+exportAll(require('./dist/network/Error'));
+exportAll(require('./dist/network/Koa'));
+exportAll(require('./dist/network/Router'));

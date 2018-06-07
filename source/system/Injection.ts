@@ -1,9 +1,10 @@
 /// <reference path="../typings/reflect-metadata.d.ts" />
 
-import * as lodash from 'lodash';
+import * as _ from 'lodash';
 
 import { ReflectiveInjector } from '@angular/core/src/di';
 
+import { Injector } from '@angular/core'
 
 export { autoInject, component, bootstrap };
 
@@ -16,6 +17,12 @@ interface Type<T> extends Function {
 	new(...args): T;
 }
 
+interface Provide<T> {
+	provide: Type<T>,
+	useClass: Type<T>,
+	deps: Type<T>[]
+}
+
 
 interface ComponentMetadata {
 	implClasses: Type<any>[];
@@ -26,7 +33,7 @@ const COMPONENT = Symbol('component');
 
 
 function component(metadata: ComponentMetadata) {
-	return function(target) {
+	return function (target) {
 		Reflect.defineMetadata(COMPONENT, metadata, target);
 	};
 }
@@ -34,18 +41,17 @@ function component(metadata: ComponentMetadata) {
 
 function bootstrap<T>(target: Type<T>, providers: any[]): T {
 
-	const foundTypes = findParamTypes(target);
-	const paramTypes = lodash.uniq(foundTypes);
-	const knownTypes = paramTypes.concat(target);
+	const targetProvider: Provide<T> = { provide: target, useClass: target, deps: [] };
 
-	const implClasses = lodash.flatMap(knownTypes, getImplClasses);
-	const classProviders = implClasses.map(createProvider);
+	const foundProviders = _.unionWith(findParamTypes(targetProvider), _.isEqual);
+	const knownProviders = foundProviders.concat(targetProvider);
 
-	const abstractTypes = classProviders.map(item => item.provide);
-	const concreteTypes = lodash.difference(knownTypes, abstractTypes);
+	const implProviders = _.flatMap(knownProviders, getImplClasses).map(createProvider);
 
-	const injector = ReflectiveInjector.resolveAndCreate([
-		implClasses, classProviders, concreteTypes, providers,
+	const concreteProviders = _.differenceWith(knownProviders, implProviders, _.isEqual);
+
+	const injector = Injector.create([
+		concreteProviders, implProviders, providers
 	]);
 
 	return injector.get(target);
@@ -53,22 +59,25 @@ function bootstrap<T>(target: Type<T>, providers: any[]): T {
 }
 
 
-function findParamTypes(target): any[] {
+function findParamTypes(target: Provide<any>): any[] {
 
-	const value = Reflect.getMetadata('design:paramtypes', target);
+	const value = Reflect.getMetadata('design:paramtypes', target.provide);
 	if (!value) return [];
 
-	const ownTypes = value as any[];
-	const subTypes = lodash.flatMap(ownTypes, findParamTypes);
+	const ownTypes = value.map(provide => {
+		target.deps.push(provide);
+		return { provide, useClass: provide, deps: [] }
+	});
+	const subTypes = _.flatMap(ownTypes, findParamTypes);
 
 	return ownTypes.concat(subTypes);
 
 }
 
 
-function getImplClasses<T>(target: Type<T>) {
+function getImplClasses<T>(target: Provide<T>) {
 
-	const value = Reflect.getMetadata(COMPONENT, target);
+	const value = Reflect.getMetadata(COMPONENT, target.provide);
 	if (!value) return [];
 
 	const metadata = value as ComponentMetadata;
@@ -76,8 +85,7 @@ function getImplClasses<T>(target: Type<T>) {
 
 }
 
-
 function createProvider<T>(child: Type<T>) {
 	const parent = Object.getPrototypeOf(child);
-	return { provide: parent, useExisting: child };
+	return { provide: parent, useClass: child, deps: [] };
 }

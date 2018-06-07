@@ -1,26 +1,27 @@
 import * as Handlebars from 'handlebars';
-import * as mailer from 'nodemailer';
+import { Transporter, SendMailOptions, SentMessageInfo, createTransport } from 'nodemailer';
+import * as Mail from 'nodemailer/lib/mailer';
 import { readFileSync } from 'fs';
-
-import AttachmentObject = mailer.AttachmentObject;
-import SentMessageInfo = mailer.SentMessageInfo;
 
 export class Mailer {
 
-    private readonly transporter: mailer.Transporter;
+    private readonly transporter: Transporter;
 
     constructor(config: any) {
-        this.transporter = mailer.createTransport(config);
+        this.transporter = createTransport(config);
     }
 
-
-    send(from: string, recipient: string, subject: string, html: string, bcc?: string, replyTo?: string,
-         attachments?: AttachmentObject[], success?: (info: any) => void, error?: (error: any) => void) {
+    send(
+        from: string, recipient: string, subject: string, html: string,
+        bcc?: string, replyTo?: string, attachments?: Mail.Attachment[],
+        success?: (info: any) => void,
+        error?: (error: any) => void
+    ) {
 
         const to = recipient;
 
-        const promise: Promise<mailer.SentMessageInfo> =
-                  this.transporter.sendMail({from, to, subject, html, attachments, bcc, replyTo}) as any;
+        const promise: Promise<SentMessageInfo> =
+            this.transporter.sendMail({ from, to, subject, html, attachments, bcc, replyTo }) as any;
 
         promise.then(info => {
             if (success) success(info);
@@ -32,7 +33,7 @@ export class Mailer {
     }
 
     sendWithTemplate(from: string, content: string, replacements: any, recipient: string, subject: string, bcc?: string, replyTo?: string,
-                     attachments?: AttachmentObject[], success?: (info: any) => void, error?: (error: any) => void) {
+        attachments?: Mail.Attachment[], success?: (info: any) => void, error?: (error: any) => void) {
 
         const template = Handlebars.compile(content);
 

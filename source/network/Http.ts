@@ -2,8 +2,7 @@
 /// <reference path="../typings/reflect-metadata.d.ts" />
 
 import { Handler } from 'koa-route';
-import { Context } from '../../network';
-
+// import { Context } from '../../network';
 
 const HTTP_LIST = Symbol('http:list');
 

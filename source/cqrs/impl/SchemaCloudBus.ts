@@ -63,10 +63,10 @@ export class SchemaCloudBus extends CommandBus {
             // Anonymous worker
             if (err instanceof CommandHandlerNotFound && body.HANDLER_NAME && body.ROUTING_KEY) {
                 cloud_worker = worker = {
-                    handler:   () => {
+                    handler: () => {
                     },
-                    id:        this.generateId(),
-                    type:      { HANDLER_NAME: body.HANDLER_NAME, ROUTING_KEY: body.ROUTING_KEY },
+                    id: this.generateId(),
+                    type: { HANDLER_NAME: body.HANDLER_NAME, ROUTING_KEY: body.ROUTING_KEY },
                     callbacks: {},
                     anonymous: true
                 };
@@ -99,10 +99,7 @@ export class SchemaCloudBus extends CommandBus {
 
         const type = config.bus.type || 'direct';
 
-        const host     = config.spring.rabbitmq.host;
-        const port     = config.spring.rabbitmq.port;
-        const login    = config.spring.rabbitmq.username;
-        const password = config.spring.rabbitmq.password;
+        const { host, port, password, 'username': login} = config.spring.rabbitmq;
 
         await this.connectCloud(
             this.__appName, this.__exchangeName,
@@ -127,7 +124,7 @@ export class SchemaCloudBus extends CommandBus {
      * @returns {Promise<void>}
      */
     async connectCloud(appName, exchangeName, connectionOptions: ConnectionOptions,
-                       exchangeOptions: ExchangeOptions, queueConfigs: QueueConfig[]): Promise<void> {
+        exchangeOptions: ExchangeOptions, queueConfigs: QueueConfig[]): Promise<void> {
 
         this.__rabbitMQ = new RabbitMQ(appName, exchangeName, connectionOptions, exchangeOptions, queueConfigs);
         await this.__rabbitMQ.connect(await this.onMessage.bind({ workers: this.cloud_workers, context: this }));
@@ -145,15 +142,15 @@ export class SchemaCloudBus extends CommandBus {
      */
     private async onMessage(message, header, deliveryInfo, messageObject) {
         const payload: Payload = JSON.parse(message.data.toString('utf8'));
-        const context          = (this as any).context;
+        const context = (this as any).context;
 
         const worker = this.workers.get(payload.handler as any);
 
         // Define "me" object of this
-        const me: Me                = {
-            app:        context.__appName,
+        const me: Me = {
+            app: context.__appName,
             uniqueName: this.__uniqueName,
-            handler:    (worker || { handler: '' }).handler as string
+            handler: (worker || { handler: '' }).handler as string
         };
         const { sender, sessionId } = payload;
 
@@ -204,11 +201,11 @@ export class SchemaCloudBus extends CommandBus {
      * @param handler
      */
     public register<T>(type: Command.CloudStatic<T>,
-                       handler: Command.Handler<T>,) {
+        handler: Command.Handler<T>, ) {
 
         if (this.workers.has(type)) throw new CommandHandlerExisted();
 
-        const id     = this.generateWorkerName(type);
+        const id = this.generateWorkerName(type);
         const worker = { id, type, handler, callbacks: {} };
 
         // Register with command queue
@@ -252,7 +249,7 @@ export class SchemaCloudBus extends CommandBus {
 
         }
 
-        const me      = { app: this.__appName, uniqueName: this.__uniqueName, handler: cloud_worker.id as string };
+        const me = { app: this.__appName, uniqueName: this.__uniqueName, handler: cloud_worker.id as string };
         const handler = this.hash(type.HANDLER_NAME.toLowerCase());
 
         // Push to Cloud
@@ -300,7 +297,7 @@ export class SchemaCloudBus extends CommandBus {
      * @returns {Promise<{err, msg }>}
      */
     public async publish(routingKey: string, sessionId: string, sender: Me, handler: string,
-                         message: any, direction: Direction): Promise<{ err: any, msg: any }> {
+        message: any, direction: Direction): Promise<{ err: any, msg: any }> {
 
         return await this.__rabbitMQ.publish(
             routingKey,
@@ -363,4 +360,4 @@ export interface Me {
 
 export type Direction = 'request' | 'response' | 'fallback'
 
-export enum DIRECTION_ENUM { REQUEST = 'request' as any, RESPONSE = 'response' as any, FALLBACK = 'fallback' as any}
+export enum DIRECTION_ENUM { REQUEST = 'request' as any, RESPONSE = 'response' as any, FALLBACK = 'fallback' as any }

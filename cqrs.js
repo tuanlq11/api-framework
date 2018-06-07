@@ -6,8 +6,8 @@ function exportAll(module) {
     }
 }
 
-exportAll(require('./dist/source/cqrs/CommandBus'));
-exportAll(require('./dist/source/cqrs/InvalidCommand'));
+exportAll(require('./dist/cqrs/CommandBus'));
+exportAll(require('./dist/cqrs/InvalidCommand'));
 
-exportAll(require('./dist/source/cqrs/impl/SchemaCommandBus'));
-exportAll(require('./dist/source/cqrs/impl/SchemaCloudBus'));
+exportAll(require('./dist/cqrs/impl/SchemaCommandBus'));
+exportAll(require('./dist/cqrs/impl/SchemaCloudBus'));
