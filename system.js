@@ -15,8 +15,3 @@ exportAll(require('./dist/system/Util'));
 
 exportAll(require('./dist/system/impl/JsonLogger'));
 exportAll(require('./dist/system/impl/TextLogger'));
-
-exportAll(require('./dist/system/EurekaClient'));
-
-exportAll(require('./dist/system/config/ConfigFactory'));
-exportAll(require('./dist/system/config/ConfigImpl'));

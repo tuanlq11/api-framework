@@ -34,7 +34,8 @@ export class StaticProvider implements ConfigProviderContract {
     }
 
     getPath(): string | undefined {
-        return path.join(this.source.data.dir, "config." + this.source.env);
+        const { source: { data, env } } = this;
+        return path.join(data.dir, "config." + env);
     }
 
     getContent(): any {
@@ -43,7 +44,7 @@ export class StaticProvider implements ConfigProviderContract {
 
     setSource(config: StaticSource): StaticProvider {
         this.source = config;
-        this.path   = this.getPath() as any;
+        this.path = this.getPath() as any;
 
         return this;
     }

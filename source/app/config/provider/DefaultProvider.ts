@@ -10,14 +10,20 @@ export class DefaultProvider implements ConfigProviderContract {
 
     load() {
         this.content = {
+            name: 'microservice',
+            listen: {
+                addr: '127.0.0.1',
+                port: 3020
+            },
             registry: {
                 eureka: {
-                    server:   {
+                    enabled: true,
+                    server: {
                         proto: 'http'
                     },
                     instance: {
                         renewalIntervalInSecs: 30,
-                        durationInSecs:        90,
+                        durationInSecs: 90,
                         registryFetchInterval: 30000
                     }
                 }

@@ -6,9 +6,6 @@
     "test": "mocha --async-only --bail --ui qunit dist-root/tests",
     "postinstall": "tsc --project source --outDir dist"
   },
-  "bin": {
-    "api": "./bin/run.js"
-  },
   "dependencies": {
     "@angular/core": "~6.0.3",
     "@types/amqp": "~0.2.0",
@@ -31,12 +28,13 @@
     "koa": "~2.5.1",
     "koa-route": "~3.2.0",
     "lodash": "~4.17.0",
+    "node-env-file": "^0.1.8",
     "nodemailer": "~4.6.0",
     "reflect-metadata": "0.1",
     "rxjs": "~6.2.0",
+    "sequelize": "~4.37.0",
     "underscore-x": "~0.1.0",
     "uuid": "~3.2.0",
-    "sequelize": "~4.37.0",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {

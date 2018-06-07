@@ -1,4 +1,4 @@
-export abstract class ConfigImpl {
+export abstract class ConfigContract {
 
     source: {
         path: string;
@@ -14,6 +14,7 @@ export abstract class ConfigImpl {
 
     registry: {
         eureka: {
+            enabled: boolean,
             server: {
                 host: string;
                 port: number;

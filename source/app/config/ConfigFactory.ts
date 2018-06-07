@@ -26,7 +26,7 @@ export class ConfigFactory {
             const instance: ConfigSingleton = { get: undefined, content: {} };
 
             for (const provider of this.providers) {
-                (provider as ConfigProviderContract).setSource(instance.content);
+                (<ConfigProviderContract>provider).setSource(instance.content);
                 await provider.load();
                 _.extend_x(instance.content, provider.getContent());
             }

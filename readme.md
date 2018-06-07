@@ -1,5 +1,5 @@
 
-ECA Framework
+API Framework
 =============
 
 $ npm test

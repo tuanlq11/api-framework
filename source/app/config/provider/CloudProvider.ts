@@ -25,9 +25,9 @@ export class CloudProvider implements ConfigProviderContract {
             HTTP.request({
                 protocol: this.url.protocol,
                 hostname: this.url.hostname,
-                port:     this.url.port as any,
-                path:     this.getPath(),
-                auth:     this.getAuth()
+                port: this.url.port as any,
+                path: this.getPath(),
+                auth: this.getAuth()
             }, (res) => {
                 if (res.statusCode != 200) {
                     this.logger.error(`Server response status code: ${res.statusCode}`);
@@ -74,15 +74,17 @@ export class CloudProvider implements ConfigProviderContract {
     }
 
     getPath(): string | undefined {
-        if (this.url.path === undefined) return undefined;
+        const { url, source } = this;
+        const { path } = url;
 
-        const path = this.url.path;
+        if (path === undefined) return undefined;
+
         return (
             path.endsWith('/') ? path : path + '/').concat(
-            encodeURIComponent(this.source.name), '/',
-            encodeURIComponent(this.source.registry.configuration.profiles.join(',')), '/',
-            this.source.registry.configuration.label ? encodeURIComponent(this.source.registry.configuration.label) : ''
-        );
+                encodeURIComponent(source.name), '/',
+                encodeURIComponent(source.registry.configuration.profiles.join(',')), '/',
+                this.source.registry.configuration.label ? encodeURIComponent(this.source.registry.configuration.label) : ''
+            );
     }
 
     getContent(): any {
@@ -93,7 +95,7 @@ export class CloudProvider implements ConfigProviderContract {
         this.source = _.extend_x({
             registry: {
                 configuration: {
-                    proto:  'http',
+                    proto: 'http',
                     prefix: 'config'
                 }
             }
@@ -119,10 +121,10 @@ export class CloudProvider implements ConfigProviderContract {
 
         if (kArr.length == 0) return value;
 
-        const key   = kArr[0].toLowerCase();
+        const key = kArr[0].toLowerCase();
         const kArrN = kArr.slice(1);
 
-        let result  = {};
+        let result = {};
         result[key] = this.parseRecur(kArrN, value, level + 1);
 
         if (level === 0 && this[key] === undefined) {
