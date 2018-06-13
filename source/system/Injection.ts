@@ -2,8 +2,6 @@
 
 import * as _ from 'lodash';
 
-import { ReflectiveInjector } from '@angular/core/src/di';
-
 import { Injector } from '@angular/core'
 
 export { autoInject, component, bootstrap };
@@ -11,7 +9,6 @@ export { autoInject, component, bootstrap };
 
 function autoInject(target) {
 }
-
 
 interface Type<T> extends Function {
 	new(...args): T;
@@ -23,14 +20,11 @@ interface Provide<T> {
 	deps: Type<T>[]
 }
 
-
 interface ComponentMetadata {
 	implClasses: Type<any>[];
 }
 
-
 const COMPONENT = Symbol('component');
-
 
 function component(metadata: ComponentMetadata) {
 	return function (target) {
@@ -38,16 +32,13 @@ function component(metadata: ComponentMetadata) {
 	};
 }
 
-
 function bootstrap<T>(target: Type<T>, providers: any[]): T {
 
 	const targetProvider: Provide<T> = { provide: target, useClass: target, deps: [] };
 
 	const foundProviders = _.unionWith(findParamTypes(targetProvider), _.isEqual);
 	const knownProviders = foundProviders.concat(targetProvider);
-
-	const implProviders = _.flatMap(knownProviders, getImplClasses).map(createProvider);
-
+	const implProviders = _.flatMap(knownProviders, getImplClasses);
 	const concreteProviders = _.differenceWith(knownProviders, implProviders, _.isEqual);
 
 	const injector = Injector.create([
@@ -58,10 +49,9 @@ function bootstrap<T>(target: Type<T>, providers: any[]): T {
 
 }
 
-
 function findParamTypes(target: Provide<any>): any[] {
 
-	const value = Reflect.getMetadata('design:paramtypes', target.provide);
+	const value = Reflect.getMetadata('design:paramtypes', target.useClass);
 	if (!value) return [];
 
 	const ownTypes = value.map(provide => {
@@ -74,14 +64,17 @@ function findParamTypes(target: Provide<any>): any[] {
 
 }
 
-
 function getImplClasses<T>(target: Provide<T>) {
 
 	const value = Reflect.getMetadata(COMPONENT, target.provide);
 	if (!value) return [];
 
-	const metadata = value as ComponentMetadata;
-	return metadata.implClasses;
+	const { implClasses } = value as ComponentMetadata;
+
+	const ownProviders: any = implClasses.map(createProvider);
+	_.flatMap(ownProviders, findParamTypes);
+
+	return ownProviders;
 
 }
 

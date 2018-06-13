@@ -5,9 +5,7 @@ export class JsonLogger extends Logger {
 
 	serializer = (fields: Object) => fields;
 
-
 	private log(level: string, message: any) {
-
 		const timestamp = new Date().toJSON();
 		const fields = { level, message, timestamp };
 		const entry = this.serializer(fields);

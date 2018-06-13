@@ -3,13 +3,13 @@
 
 import * as path from "path";
 import { ConfigProviderContract } from "../ConfigProviderContract";
-import { JsonLogger } from "../../../system/impl/JsonLogger";
+import { TextLogger } from "../../../system/impl/TextLogger";
 
 const _ = require('underscore-x');
 
 export class StaticProvider implements ConfigProviderContract {
 
-    private readonly logger: JsonLogger = new JsonLogger();
+    private readonly logger = new TextLogger();
 
     private source: StaticSource;
     private path: string;

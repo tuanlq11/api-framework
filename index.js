@@ -14,7 +14,7 @@ exportAll('./dist/system/Util');
 
 exportAll('./dist/system/impl/JsonLogger');
 exportAll('./dist/system/impl/TextLogger');
-
+exportAll('./dist/system/impl/WinstonLogger');
 
 exportAll('./dist/network/Http');
 
@@ -22,19 +22,20 @@ exportAll('./dist/network/Error');
 exportAll('./dist/network/Koa');
 exportAll('./dist/network/Router');
 
-
 exportAll('./dist/cqrs/CommandBus');
 exportAll('./dist/cqrs/InvalidCommand');
 
 exportAll('./dist/cqrs/impl/SchemaCommandBus');
-exportAll('./dist/cqrs/impl/SchemaCloudBus');
+exportAll('./dist/cqrs/impl/SchemaBrokerBus');
 
 exportAll('./dist/app/config/ConfigFactory');
 exportAll('./dist/app/config/ConfigContract');
 
-exportAll('./dist/app/EurekaClient');
+exportAll('./dist/lib/EurekaClient');
 
 exportAll('./dist/common/Mailer');
 exportAll('./dist/common/PasswordEncoder');
 exportAll('./dist/common/PDFHelper');
-exportAll('./dist/common/RabbitMQ');
+
+exportAll('./dist/lib/message/impl/RabbitMQ');
+exportAll('./dist/lib/message/MessageBroker');

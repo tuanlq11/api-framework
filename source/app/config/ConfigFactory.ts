@@ -5,12 +5,14 @@ import { CloudProvider } from "./provider/CloudProvider";
 import { ConfigProviderContract } from "./ConfigProviderContract";
 import { EnvironmentProvider } from "./provider/EnvironmentProvider";
 import { DefaultProvider } from "./provider/DefaultProvider";
+import { ConfigContract } from "./ConfigContract";
 
 const _ = require('underscore-x');
 
 export class ConfigFactory {
 
-    private static singleton: ConfigSingleton;
+    private static singleton: ConfigContract;
+    
     private static providers = [
         new DefaultProvider(),
         new EnvironmentProvider(),
@@ -19,9 +21,9 @@ export class ConfigFactory {
         new StaticProvider()
     ];
 
-    static async build(): Promise<ConfigSingleton> {
+    static async build(path?: string): Promise<ConfigContract> {
 
-        if (this.singleton === undefined) {
+        if (!this.singleton) {
 
             const instance: ConfigSingleton = { get: undefined, content: {} };
 
@@ -43,7 +45,7 @@ export class ConfigFactory {
                 return instance[key] || _default;
             }.bind({ instance });
 
-            this.singleton = instance;
+            this.singleton = { ...instance.content, ...{ source: { path } } };
         }
 
         return this.singleton;

@@ -3,14 +3,14 @@
 import { Url, parse } from 'url';
 import * as HTTP from 'http';
 
-import { JsonLogger } from '../../../system/impl/JsonLogger';
+import { TextLogger } from '../../../system/impl/TextLogger';
 import { ConfigProviderContract } from "../ConfigProviderContract";
 
 const _ = require('underscore-x');
 
 export class CloudProvider implements ConfigProviderContract {
 
-    private readonly logger: JsonLogger = new JsonLogger();
+    private readonly logger = new TextLogger();
 
     private source: StaticSource;
 

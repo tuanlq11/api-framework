@@ -2,13 +2,13 @@
 
 
 import { ConfigProviderContract } from "../ConfigProviderContract";
-import { JsonLogger } from "../../../system/impl/JsonLogger";
+import { TextLogger } from "../../../system/impl/TextLogger";
 
 const _ = require('underscore-x');
 
 export class EnvironmentProvider implements ConfigProviderContract {
 
-    private readonly logger: JsonLogger = new JsonLogger();
+    private readonly logger = new TextLogger();
     private content: any = {};
 
     async load() {

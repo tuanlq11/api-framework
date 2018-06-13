@@ -11,7 +11,6 @@ import { Handler } from 'koa-route';
 
 import { HttpMetadata } from './Http';
 
-
 interface Route {
 	handler: Handler;
 	method: string;
@@ -26,7 +25,6 @@ export class Router {
 	constructor() {
 		this.routes = [];
 	}
-
 
 	register(controller) {
 		const annotations = HttpMetadata.get(controller);

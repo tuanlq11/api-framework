@@ -20,15 +20,14 @@ export abstract class CommandBus {
     async resolve() {
         for (const [type, worker] of this.workers) {
             if (!worker.validator) {
-                const filePath   = path.join(this.schemaPath, type.SCHEMA_FILE);
-                const schema     = await dereference(filePath);
+                const filePath = path.join(this.schemaPath, type.SCHEMA_FILE);
+                const schema = await dereference(filePath);
                 worker.validator = Validator(schema, { greedy: true });
             }
         }
     }
 
-    abstract register<T>(type: Command.Static<T>,
-                         handler: Command.Handler<T>);
+    abstract register<T>(type: any, handler: Command.Handler<T>);
 
     abstract execute(command: any, callback?: Callback): Promise<any>;
 
