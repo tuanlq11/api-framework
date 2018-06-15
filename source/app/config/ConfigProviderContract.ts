@@ -1,9 +1,16 @@
-"use strict";
+import * as merge from "deepmerge";
 
-export interface ConfigProviderContract {
-    load();
-    exists(key: string): boolean;
-    getPath(): string | undefined;
-    getContent(): any;
-    setSource(config: any): ConfigProviderContract;
+export abstract class ConfigProviderContract {
+
+    source: any;
+    content: any;
+
+    abstract load();
+    abstract exists(key: string): boolean;
+    abstract getPath(): string | undefined;
+
+    setSource(source: any) {
+        this.content = merge(this.content || {}, source)
+    };
+
 }

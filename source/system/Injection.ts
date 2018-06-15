@@ -6,8 +6,8 @@ import { Injector } from '@angular/core'
 
 export { autoInject, component, bootstrap };
 
-
 function autoInject(target) {
+
 }
 
 interface Type<T> extends Function {
@@ -22,6 +22,7 @@ interface Provide<T> {
 
 interface ComponentMetadata {
 	implClasses: Type<any>[];
+	providers: Provide<any>[];
 }
 
 const COMPONENT = Symbol('component');
@@ -40,17 +41,17 @@ function bootstrap<T>(target: Type<T>, providers: any[]): T {
 	const knownProviders = foundProviders.concat(targetProvider);
 	const implProviders = _.flatMap(knownProviders, getImplClasses);
 	const concreteProviders = _.differenceWith(knownProviders, implProviders, _.isEqual);
-
+	
 	const injector = Injector.create([
 		concreteProviders, implProviders, providers
 	]);
-
+	
 	return injector.get(target);
 
 }
 
 function findParamTypes(target: Provide<any>): any[] {
-
+	
 	const value = Reflect.getMetadata('design:paramtypes', target.useClass);
 	if (!value) return [];
 
@@ -69,12 +70,12 @@ function getImplClasses<T>(target: Provide<T>) {
 	const value = Reflect.getMetadata(COMPONENT, target.provide);
 	if (!value) return [];
 
-	const { implClasses } = value as ComponentMetadata;
+	const { implClasses, providers } = value as ComponentMetadata;
 
 	const ownProviders: any = implClasses.map(createProvider);
 	_.flatMap(ownProviders, findParamTypes);
 
-	return ownProviders;
+	return ownProviders.concat(providers);
 
 }
 

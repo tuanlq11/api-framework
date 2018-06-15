@@ -1,6 +1,6 @@
 {
   "name": "api-framework",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "scripts": {
     "pretest": "tsc --project tests --outDir dist-root",
     "test": "mocha --async-only --bail --ui qunit dist-root/tests",
@@ -9,19 +9,22 @@
   "dependencies": {
     "@angular/core": "~6.0.3",
     "@types/amqp": "~0.2.0",
-    "@types/amqplib": "^0.5.7",
+    "@types/amqplib": "~0.5.7",
     "@types/bcrypt": "~1.0.0",
+    "@types/deepmerge": "^2.1.0",
     "@types/eureka-js-client": "~4.3.1",
     "@types/handlebars": "~4.0.32",
     "@types/html-pdf": "~2.1.2",
     "@types/node": "~8.9.4",
     "@types/nodemailer": "~4.6.0",
+    "@types/request": "~2.47.0",
     "@types/uuid": "~3.0.0",
-    "@types/winston": "^2.3.9",
-    "amqplib": "^0.5.2",
+    "@types/winston": "~2.3.9",
+    "amqplib": "~0.5.2",
     "bcrypt": "~2.0.1",
     "co-body": "~6.0.0",
     "continuation-local-storage": "3.2",
+    "deepmerge": "~2.1.1",
     "eureka-js-client": "~4.3.0",
     "handlebars": "~4.0.8",
     "html-pdf": "~2.1.0",
@@ -33,12 +36,13 @@
     "node-env-file": "^0.1.8",
     "nodemailer": "~4.6.0",
     "reflect-metadata": "0.1",
+    "request": "~2.87.0",
     "rxjs": "~6.2.0",
     "sequelize": "~4.37.0",
     "tslint": "^5.10.0",
     "underscore-x": "~0.1.0",
     "uuid": "~3.2.0",
-    "winston": "^2.4.2",
+    "winston": "~2.4.2",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
@@ -50,6 +54,6 @@
     "typescript": "~2.8.0"
   },
   "engines": {
-    "node": ">=8.9.3"
+    "node": ">=8.11.3"
   }
 }

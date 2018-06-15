@@ -21,7 +21,7 @@ export class SchemaBrokerBus extends SchemaCommandBus {
         readonly messageBroker: MessageBroker
     ) {
         super();
-
+        
         this.id = uuid.v4();
         const { name, env, registry: { configuration: { "label": project } } } = config;
 
@@ -34,11 +34,11 @@ export class SchemaBrokerBus extends SchemaCommandBus {
      * Initialize queue for subscribe
      */
     async subscribe() {
-        const { queue, messageBroker, logger } = this;
-        
+        const { "queue": name, messageBroker, logger } = this;
+
 
         await messageBroker.connect();
-        await messageBroker.sub(queue, () => this.consume);
+        await messageBroker.sub({ name, consume: () => this.consume });
 
         await this.routing();
     }
@@ -52,15 +52,15 @@ export class SchemaBrokerBus extends SchemaCommandBus {
 
         const queue = { name: queueName, type: 'queue' };
 
-        const projectRouter = `${project}.${env}`;
+        const projectRouter = { name: `${project}.${env}`, type: 'mixed' };
         const serviceRouter = { name: `${project}.${env}.${name}`, type: 'exchange' };
 
         // Create router
-        await messageBroker.router(projectRouter, 'topic');
-        await messageBroker.router(serviceRouter.name, 'direct')
+        await messageBroker.router({ name: projectRouter.name, type: 'topic' });
+        await messageBroker.router({ name: serviceRouter.name, type: 'direct' });
 
-        await messageBroker.routing(projectRouter, serviceRouter, `${projectRouter}.#`)
-        await messageBroker.routing(serviceRouter.name, queue, name);
+        await messageBroker.routing({ src: projectRouter, dest: serviceRouter, pattern: `${projectRouter}.#` })
+        await messageBroker.routing({ src: serviceRouter, dest: queue, pattern: name });
     }
 
     /**

@@ -1,31 +1,27 @@
 import { Logger } from '../Logger';
-import { ConfigContract } from '../../app/config/ConfigContract';
+import { ConfigContract as Config } from '../../app/config/ConfigContract';
 import { autoInject } from '../../system/Injection';
 
 import * as winston from 'winston';
-import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 @autoInject
 export class WinstonLogger extends Logger {
 
     private logger: winston.LoggerInstance;
 
-    constructor(readonly config: ConfigContract) {
+    constructor(readonly config: Config) {
         super();
         const { 'log_level': level = 'info' } = config;
 
-        const timestamp = () => { return new Date() };
+        const timestamp = () => { return new Date().toUTCString() };
         const formatter = (options) => {
-            console.log(options.meta);
-            const { func = 'default' } = this.trace().pop() || {};
-
-            return `[${options.level.toUpperCase()}] ${options.message || ''} ${options.meta} ${options.timestamp()}`;
+            return `[${options.level.toUpperCase()}] ${options.message} ${(options.meta && Object.keys(options.meta).length ? '\n\t' + JSON.stringify(options.meta) : '')} ${options.timestamp()}`;
         }
 
         this.logger = new winston.Logger({
             level,
             transports: [
-                new winston.transports.Console({ formatter, timestamp }),
+                new winston.transports.Console({ timestamp, formatter }),
             ]
         });
     }
@@ -40,24 +36,20 @@ export class WinstonLogger extends Logger {
         }).slice(3, -1);
     }
 
-
-
-    debug(message: any) {
-        message = { ...message, ...this.trace()[0] }
-        this.logger.debug(message);
+    debug(message: any, ...meta: any[]) {
+        this.logger.debug(message, ...meta, this.trace()[0]);
     }
 
-    info(message: any) {
-        this.logger.info(message);
+    info(message: any, ...meta: any[]) {
+        this.logger.info(message, ...meta);
     }
 
-    warn(message: any) {
-        this.logger.warn(message);
+    warn(message: any, ...meta: any[]) {
+        this.logger.warn(message, ...meta);
     }
 
-    error(message: any) {
-        message = { ...message, ...this.trace()[0] }
-        this.logger.error(message);
+    error(message: any, ...meta: any[]) {
+        this.logger.error(message, ...meta, this.trace()[0]);
     }
 
 }

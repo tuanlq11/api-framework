@@ -1,25 +1,21 @@
 "use strict";
 
-
 import * as path from "path";
 import { ConfigProviderContract } from "../ConfigProviderContract";
 import { TextLogger } from "../../../system/impl/TextLogger";
 
-const _ = require('underscore-x');
-
-export class StaticProvider implements ConfigProviderContract {
+export class StaticProvider extends ConfigProviderContract {
 
     private readonly logger = new TextLogger();
 
-    private source: StaticSource;
     private path: string;
 
-    private content: any = {};
-
     async load() {
-        this.logger.info(`Fetching static configuration from ${this.path}`);
+        
+        this.logger.debug(`Local Configuration: ${this.path}`);
         this.content = require(this.path);
-        this.logger.info(`Fetched static configuration`);
+        this.logger.info(`Local Configuration: Loaded`);
+
         for (const key in this.content) {
             Object.defineProperty(this, key, {
                 get: () => {
@@ -42,17 +38,10 @@ export class StaticProvider implements ConfigProviderContract {
         return this.content;
     }
 
-    setSource(config: StaticSource): StaticProvider {
+    setSource(config: any): StaticProvider {
         this.source = config;
         this.path = this.getPath() as any;
 
         return this;
     }
-}
-
-export interface StaticSource {
-    data: {
-        dir: string
-    };
-    env: string;
 }

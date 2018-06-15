@@ -39,9 +39,7 @@ declare namespace framework {
         (msg: any): void
     }
 
-    abstract class ConfigFactory {
-        static build(path?: string);
-    }
+    function ConfigFactory(path: string);
 
     abstract class ConfigContract {
 

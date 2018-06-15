@@ -1,76 +1,50 @@
 'use strict';
 
-import { Url, parse } from 'url';
-import * as HTTP from 'http';
+import { Url, parse, format } from 'url';
+import * as request from 'request';
+import * as merge from 'deepmerge';
 
 import { TextLogger } from '../../../system/impl/TextLogger';
 import { ConfigProviderContract } from "../ConfigProviderContract";
+import { ConfigContract } from '../ConfigContract';
 
-const _ = require('underscore-x');
-
-export class CloudProvider implements ConfigProviderContract {
+export class CloudProvider extends ConfigProviderContract {
 
     private readonly logger = new TextLogger();
 
-    private source: StaticSource;
-
     private url: Url;
-    private content: any = {};
 
     async load() {
 
-        this.logger.info(`Fetching cloud configuration from ${this.url.href}`);
+        const { url: { protocol, hostname, port }, source: { registry } } = this;
+        const { configuration: { auth } } = registry;
+
+        const pathname = this.getPath();
+
+        this.logger.debug(`Remote Configuration: ${this.url.href}`)
 
         return await (new Promise((resolve, reject) => {
-            HTTP.request({
-                protocol: this.url.protocol,
-                hostname: this.url.hostname,
-                port: this.url.port as any,
-                path: this.getPath(),
-                auth: this.getAuth()
-            }, (res) => {
+
+            const url = format({ protocol, hostname, port, pathname });
+
+            request({ url, json: true, method: 'GET', auth }, (err, res, body) => {
+
                 if (res.statusCode != 200) {
                     this.logger.error(`Server response status code: ${res.statusCode}`);
                     resolve();
                 }
 
-                res.setEncoding('utf8');
-                let response = '';
+                this.parse(body.propertySources);
+                this.logger.info('Remote Configuration: Loaded');
+                resolve(this);
+            })
 
-                res.on('data', (data) => {
-                    response += data;
-                });
-
-                res.on('end', () => {
-                    try {
-                        const body = JSON.parse(response);
-                        this.parse(body.propertySources);
-                        this.logger.info('Fetched cloud configuration');
-                        resolve(this);
-                    } catch (e) {
-                        this.logger.error(e);
-                        resolve();
-                    }
-                });
-
-            }).on('error', (e) => {
-                this.logger.error(e);
-                resolve();
-            }).end();
         }));
 
     }
 
     exists(key: string): boolean {
         return true;
-    }
-
-    getAuth() {
-        if (this.source.registry.configuration.auth) {
-            return this.source.registry.configuration.auth.user + ':' + this.source.registry.configuration.auth.pass;
-        }
-
-        return this.url.auth;
     }
 
     getPath(): string | undefined {
@@ -87,80 +61,28 @@ export class CloudProvider implements ConfigProviderContract {
             );
     }
 
-    getContent(): any {
-        return this.content;
-    }
+    setSource(source: ConfigContract | any): CloudProvider {
+        this.source = source;
+        const { proto, host, port, prefix } = this.source.registry.configuration;
 
-    setSource(source: StaticSource): CloudProvider {
-        this.source = _.extend_x({
-            registry: {
-                configuration: {
-                    proto: 'http',
-                    prefix: 'config'
-                }
-            }
-        }, source);
-
-        const config: any = this.source.registry.configuration;
-
-        this.url = parse(
-            config.proto.concat(
-                '://',
-                config.host,
-                ':',
-                (config.port + ''),
-                '/',
-                (config.prefix || '')
-            ));
+        this.url = parse(`${proto}://${host}:${port}/${prefix}`);
 
         return this;
-
     }
 
-    private parseRecur(kArr: any[], value: any, level: number) {
+    private deepParse(keys: any[], val: any, lvl: number = 0) {
+        const key = keys.shift();
+        if (!key) return val;
 
-        if (kArr.length == 0) return value;
-
-        const key = kArr[0].toLowerCase();
-        const kArrN = kArr.slice(1);
-
-        let result = {};
-        result[key] = this.parseRecur(kArrN, value, level + 1);
-
-        if (level === 0 && this[key] === undefined) {
-            Object.defineProperty(this, key, {
-                get: () => {
-                    return this.content[key];
-                }
-            });
-        }
-
-        return result;
+        return { [key.toLowerCase()]: this.deepParse(keys, val, ++lvl) };
     }
 
     private parse(body: any[]) {
         for (const record of body.reverse()) {
             const { source } = record;
             for (const key in source) {
-                _.extend_x(this.content, this.parseRecur(key.split('.'), source[key], 0));
+                this.content = merge(this.content, this.deepParse(key.split('.'), source[key]));
             }
         }
     }
-}
-
-export interface StaticSource {
-    name: string;
-    registry: {
-        configuration: RegistryConfig
-    };
-}
-
-export interface RegistryConfig {
-    host: string;
-    port: number;
-    label?: string;
-    profiles: string[];
-    proto?: string;
-    prefix?: string;
-    auth?: { user: string, pass: string }
 }

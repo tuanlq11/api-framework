@@ -8,18 +8,41 @@ export abstract class MessageBroker {
     abstract disconnect(): Promise<boolean>;
 
     abstract pub(to, content): boolean;
-    abstract sub(name: string, consume?: ConsumeCallback): Promise<MessageBroker>;
+    abstract sub(option: SubOption): Promise<MessageBroker>;
 
     /** Route feature only for RabbitMQ  */
-    abstract router(name: string, type: string, options?: any): Promise<MessageBroker>;
-    abstract routing(src: string, dest: DestRouter, pattern?: string, options?: Object): Promise<MessageBroker>;
+    abstract router(option: RouterOption): Promise<MessageBroker>;
+    abstract routing(option: RoutingOption): Promise<MessageBroker>;
 }
 
-export interface DestRouter {
+export interface Node {
     type: string;
     name: string;
 }
 
+export interface SubOption {
+    name: string,
+    consume: ConsumeCallback
+}
+
 export interface ConsumeCallback {
     (msg: any): void
+}
+
+export interface RouterOption {
+    name: string,
+    type: string,
+    options?: any
+}
+
+export interface RoutingOption {
+    src: Node,
+    dest: Node,
+    pattern?: string,
+    options?: any
+}
+
+export enum Status {
+    CONNECTED = 'connected',
+    CLOSED = 'closed'
 }

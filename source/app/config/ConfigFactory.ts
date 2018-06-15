@@ -1,60 +1,33 @@
 'use strict';
-
-import { StaticProvider } from "./provider/StaticProvider";
-import { CloudProvider } from "./provider/CloudProvider";
 import { ConfigProviderContract } from "./ConfigProviderContract";
-import { EnvironmentProvider } from "./provider/EnvironmentProvider";
-import { DefaultProvider } from "./provider/DefaultProvider";
 import { ConfigContract } from "./ConfigContract";
+import { CloudProvider, DefaultProvider, EnvironmentProvider, StaticProvider } from './provider';
+import * as merge from 'deepmerge';
 
-const _ = require('underscore-x');
+let instance: ConfigContract;
 
-export class ConfigFactory {
+const providers: ConfigProviderContract[] = [
+    new DefaultProvider(),
+    new EnvironmentProvider(),
+    new StaticProvider(),
+    new CloudProvider(),
+    new StaticProvider()
+];
 
-    private static singleton: ConfigContract;
-    
-    private static providers = [
-        new DefaultProvider(),
-        new EnvironmentProvider(),
-        new StaticProvider(),
-        new CloudProvider(),
-        new StaticProvider()
-    ];
+export async function ConfigFactory(path: string): Promise<ConfigContract> {
 
-    static async build(path?: string): Promise<ConfigContract> {
+    if (!instance) {
+        instance = {} as any;
 
-        if (!this.singleton) {
+        for (const provider of providers) {
+            provider.setSource(instance);
+            await provider.load();
 
-            const instance: ConfigSingleton = { get: undefined, content: {} };
-
-            for (const provider of this.providers) {
-                (<ConfigProviderContract>provider).setSource(instance.content);
-                await provider.load();
-                _.extend_x(instance.content, provider.getContent());
-            }
-
-            for (const key in instance.content) {
-                Object.defineProperty(instance, key, {
-                    get: () => {
-                        return instance.content[key]
-                    }
-                });
-            }
-
-            instance.get = function (key: string, _default?: any) {
-                return instance[key] || _default;
-            }.bind({ instance });
-
-            this.singleton = { ...instance.content, ...{ source: { path } } };
+            instance = merge(instance, provider.content);
         }
 
-        return this.singleton;
+        instance = { ...instance, ...{ source: { path } } } as ConfigContract;
     }
 
+    return instance;
 }
-
-export interface ConfigSingleton {
-    content: any;
-    get?(key: string, _default?: any);
-}
-

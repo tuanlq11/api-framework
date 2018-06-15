@@ -1,5 +1,5 @@
 import { connect, Connection, Options, Channel, Replies } from 'amqplib';
-import { MessageBroker, DestRouter, ConsumeCallback } from '../MessageBroker';
+import { MessageBroker, Status, RouterOption, RoutingOption, SubOption } from '../MessageBroker';
 import { ConfigContract } from '../../../app/config/ConfigContract';
 import { Logger } from '../../../system/Logger';
 import { autoInject } from '../../../system/Injection';
@@ -7,13 +7,13 @@ import { autoInject } from '../../../system/Injection';
 @autoInject
 export class RabbitMQ extends MessageBroker {
 
-    protected client: Connection;
+    protected client?: Connection;
 
-    private channel: Channel;
-    private exchanges = new Map<String, Replies.AssertExchange>();
-    private queues = new Map<String, Replies.AssertQueue>();
+    private channel?: Channel;
+    private options: any;
 
-    private options;
+    private commits = new Map<string, Bucket>();
+    private status: Status = Status.CLOSED;
 
     constructor(readonly config: ConfigContract,
         readonly logger: Logger
@@ -28,14 +28,44 @@ export class RabbitMQ extends MessageBroker {
         this.options = options;
     }
 
+    async retry(sleep = 15 * 1000) {
+        const { logger } = this;
+        logger.error('RabbitMQ Connection is Closed! Reconnecting...');
+
+        await this.disconnect();
+        await new Promise((resolve) => setTimeout(resolve, sleep));
+
+        await this.connect();
+    }
+
+    async recover() {
+        this.logger.debug('RabbitMQ is recovering last commit...');
+
+        for (const bucket of this.commits.values()) {
+            const func = bucket.func.bind(this);
+            await func(bucket.option);
+        }
+    }
+
     async connect() {
-        const { options: { username, hostname, port, password, exchange, type } } = this;
+        const { logger, options: { username, hostname, port, password } } = this;
 
         if (!this.client) {
             const params: Options.Connect = { username, password, hostname, port };
 
-            this.client = await connect(params)
-            this.channel = await this.client.createChannel();
+            try {
+                this.client = await connect(params);
+                logger.info('RabbitMQ is connected!');
+                this.channel = await this.client.createChannel();
+
+                // Recover last commit
+                await this.recover();
+                this.client.on('close', this.retry.bind(this));
+            } catch (ex) {
+                this.retry();
+                return false;
+            }
+
         }
 
         return true;
@@ -44,49 +74,66 @@ export class RabbitMQ extends MessageBroker {
     async disconnect() {
         if (!this.client) return false;
 
-        await this.client.close();
+        try { await this.client.close() } catch (ex) { };
+        this.client = this.channel = undefined;
 
         return true;
     }
 
-    async router(name: string, type: string, options?: Options.AssertExchange) {
+    async router(option: RouterOption) {
+        const { commits, channel } = this;
+        let { options, type, name } = option;
 
-        if (!this.exchanges.has(name)) {
-            options = { ...options, ...{ durable: false, autoDelete: true } };
-            this.exchanges.set(name, await this.channel.assertExchange(name, type, options));
-        }
+        options = { ...options, ...{ durable: false, autoDelete: true } };
+        if (channel) await channel.assertExchange(name, type, options);
+
+        commits.set(`router:${name}`, { func: this.router, option });
 
         return this;
     }
 
-    async routing(src: string, dest: DestRouter, pattern?: string, options?: Object) {
-        const { channel } = this;
+    async routing(option: RoutingOption) {
+        const { channel, commits } = this;
+
+        const { src, dest, pattern, options } = option;
         const { type, name } = dest;
 
-        if (type === 'queue') await channel.bindQueue(name, src, pattern || name, options);
-        if (type === 'exchange' && pattern) await channel.bindExchange(name, src, pattern);
+        if (channel) {
+            if (type === 'queue') await channel.bindQueue(name, src.name, pattern || name, options);
+            if (type === 'exchange' && pattern) await channel.bindExchange(name, src.name, pattern);
+        }
+
+        commits.set(`${JSON.stringify(src)}-${JSON.stringify(dest)}`, { func: this.routing, option });
 
         return this;
     }
 
-    async sub(name: string, consume?: ConsumeCallback) {
+    async sub(option: SubOption) {
+        const { consume, name } = option;
+        const { channel, commits } = this;
 
-        const { channel, queues } = this;
-        if (queues.has(name)) return this;
+        if (channel) {
+            const queueOptions = { autoDelete: true, durable: false };
+            await channel.assertQueue(name, queueOptions);
 
-        const queueOptions = { autoDelete: true, durable: false };
-        queues.set(name, await channel.assertQueue(name, queueOptions));
+            if (consume) channel.consume(name, consume);
+        }
 
-        if (consume) channel.consume(name, consume);
+        commits.set(`queue:${name}`, { func: this.sub, option });
 
         return this;
     }
 
     pub(to, content) {
         const { options: { exchange }, channel } = this;
+        if (!channel) return false;
 
         return channel.publish(exchange, to, Buffer.from(content))
     }
 
 }
 
+interface Bucket {
+    func: Function,
+    option: Object
+}

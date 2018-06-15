@@ -3,18 +3,15 @@
 
 import { ConfigProviderContract } from "../ConfigProviderContract";
 import { TextLogger } from "../../../system/impl/TextLogger";
+import * as merge from "deepmerge";
 
-const _ = require('underscore-x');
-
-export class EnvironmentProvider implements ConfigProviderContract {
+export class EnvironmentProvider extends ConfigProviderContract {
 
     private readonly logger = new TextLogger();
-    private content: any = {};
 
     async load() {
-        this.logger.info(`Fetching environment configuration`);
         this.parse(process.env);
-        this.logger.info(`Fetched environment configuration`);
+        this.logger.info(`ENV Configuration: Loaded`);
     }
 
     exists(key: string): boolean {
@@ -29,31 +26,20 @@ export class EnvironmentProvider implements ConfigProviderContract {
         return this.content;
     }
 
-    setSource(config: any): EnvironmentProvider {
-        return this;
-    }
+    private deepParse(keys: string[], val: string) {
+        const key = keys.shift();
+        if (!key) return val;
 
-    private parseRecur(kArr: string[], value: string) {
-
-        if (kArr.length === 0) return value;
-
-        const key = kArr[0].toLowerCase();
-        const kArrN = kArr.slice(1);
-
-        let result = {};
-
-        result[key] = this.parseRecur(kArrN, value);
-
-        return result;
+        return { [key.toLowerCase()]: this.deepParse(keys, val) };
     }
 
     private parse(data: any) {
-        for (const key in data) {
-            const kArr = key.split('_');
-            const val = process.env[key];
-            if (val === undefined || kArr[0] !== 'APP') continue;
+        for (const envKey in data) {
+            const keys = envKey.split('_');
+            const prefix = keys.shift();
+            if (!prefix || prefix !== 'APP') continue;
 
-            _.extend_x(this.content, this.parseRecur(kArr.slice(1), val))
+            this.content = merge(this.content, this.deepParse(keys, data[envKey]));
         }
     }
 }

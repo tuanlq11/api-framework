@@ -2,11 +2,7 @@
 
 import { ConfigProviderContract } from "../ConfigProviderContract";
 
-const _ = require('underscore-x');
-
-export class DefaultProvider implements ConfigProviderContract {
-
-    private content: any;
+export class DefaultProvider extends ConfigProviderContract {
 
     load() {
         this.content = {
@@ -16,6 +12,10 @@ export class DefaultProvider implements ConfigProviderContract {
                 port: 3020
             },
             registry: {
+                configuration: {
+                    proto: 'http',
+                    prefix: 'config'
+                },
                 eureka: {
                     enabled: true,
                     server: {
@@ -37,13 +37,5 @@ export class DefaultProvider implements ConfigProviderContract {
 
     getPath(): string | any {
         return null;
-    }
-
-    getContent(): any {
-        return this.content;
-    }
-
-    setSource(config: any): ConfigProviderContract {
-        return this;
     }
 }
