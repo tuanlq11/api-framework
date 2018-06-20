@@ -6,6 +6,7 @@ import * as uuid from 'uuid';
 
 import { ConfigContract } from '../../app/config/ConfigContract';
 import { MessageBroker } from '../../lib/message/MessageBroker';
+import { Logger } from '../../system/Logger'
 
 @autoInject
 export class SchemaBrokerBus extends SchemaCommandBus {
@@ -21,7 +22,7 @@ export class SchemaBrokerBus extends SchemaCommandBus {
         readonly messageBroker: MessageBroker
     ) {
         super();
-        
+
         this.id = uuid.v4();
         const { name, env, registry: { configuration: { "label": project } } } = config;
 
