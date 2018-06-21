@@ -28,14 +28,10 @@ exportAll('./dist/cqrs/InvalidCommand');
 exportAll('./dist/cqrs/impl/SchemaCommandBus');
 exportAll('./dist/cqrs/impl/SchemaBrokerBus');
 
-exportAll('./dist/app/config/ConfigFactory');
-exportAll('./dist/app/config/ConfigContract');
+exportAll('./dist/config/ConfigFactory');
+exportAll('./dist/config/ConfigContract');
 
-exportAll('./dist/lib/EurekaClient');
-
-exportAll('./dist/common/Mailer');
-exportAll('./dist/common/PasswordEncoder');
-exportAll('./dist/common/PDFHelper');
+exportAll('./dist/network/MicroService');
 
 exportAll('./dist/lib/message/impl/RabbitMQ');
 exportAll('./dist/lib/message/MessageBroker');

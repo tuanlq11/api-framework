@@ -1,6 +1,6 @@
-import { connect, Connection, Options, Channel, Replies } from 'amqplib';
+import { connect, Connection, Options, Channel } from 'amqplib';
 import { MessageBroker, Status, RouterOption, RoutingOption, SubOption } from '../MessageBroker';
-import { ConfigContract } from '../../../app/config/ConfigContract';
+import { ConfigContract } from '../../../config/ConfigContract';
 import { Logger } from '../../../system/Logger';
 import { autoInject } from '../../../system/Injection';
 
@@ -13,7 +13,6 @@ export class RabbitMQ extends MessageBroker {
     private options: any;
 
     private commits = new Map<string, Bucket>();
-    private status: Status = Status.CLOSED;
 
     constructor(readonly config: ConfigContract,
         readonly logger: Logger

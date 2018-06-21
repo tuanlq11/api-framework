@@ -4,13 +4,10 @@ import { Url, parse, format } from 'url';
 import * as request from 'request';
 import * as merge from 'deepmerge';
 
-import { TextLogger } from '../../../system/impl/TextLogger';
 import { ConfigProviderContract } from "../ConfigProviderContract";
 import { ConfigContract } from '../ConfigContract';
 
 export class CloudProvider extends ConfigProviderContract {
-
-    private readonly logger = new TextLogger();
 
     private url: Url;
 
@@ -20,8 +17,6 @@ export class CloudProvider extends ConfigProviderContract {
         const { configuration: { auth } } = registry;
 
         const pathname = this.getPath();
-
-        this.logger.debug(`Remote Configuration: ${this.url.href}`)
 
         return await (new Promise((resolve, reject) => {
 
@@ -35,7 +30,7 @@ export class CloudProvider extends ConfigProviderContract {
                 }
 
                 this.parse(body.propertySources);
-                this.logger.info('Remote Configuration: Loaded');
+                this.logger.info('Remote Configuration: Successful');
                 resolve(this);
             })
 

@@ -1,7 +1,6 @@
-/// <reference path="../typings/reflect-metadata.d.ts" />
+/// <reference types="reflect-metadata" />
 
 import * as _ from 'lodash';
-
 import { Injector } from '@angular/core'
 
 export { autoInject, component, bootstrap };

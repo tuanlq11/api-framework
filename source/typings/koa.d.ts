@@ -1,10 +1,11 @@
+/// <reference types="cookies" />
+
 declare module 'koa' {
 
 	import * as events from 'events';
 	import * as http from 'http';
 
 	import * as Cookies from 'cookies';
-
 
 	interface Dictionary {
 		[key: string]: string;

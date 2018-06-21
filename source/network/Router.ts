@@ -1,20 +1,19 @@
-/// <reference path="../typings/koa-compose.d.ts" />
-/// <reference path="../typings/koa-route.d.ts" />
-/// <reference path="../typings/co-body.d.ts" />
-
 import * as compose from 'koa-compose';
 import * as methods from 'koa-route';
 
 import { json as parse } from 'co-body';
 import { Context, Next } from 'koa';
-import { Handler } from 'koa-route';
 
 import { HttpMetadata } from './Http';
+
+interface Handler {
+	(context: Context, ...args: string[]): void | Promise<void>
+}
 
 interface Route {
 	handler: Handler;
 	method: string;
-	path : string;
+	path: string;
 }
 
 
@@ -32,7 +31,7 @@ export class Router {
 		const routes = annotations.map(item => ({
 			handler: controller[item.property].bind(controller),
 			method: item.httpMethod,
-			path : item.routePath,
+			path: item.routePath,
 		} as Route));
 
 		this.routes.push(...routes);

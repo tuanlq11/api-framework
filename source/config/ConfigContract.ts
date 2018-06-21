@@ -8,7 +8,9 @@ export abstract class ConfigContract {
 
     env: Environment;
 
-    log_level?: LogLevel;
+    log: {
+        level?: LogLevel;
+    }
 
     listen: {
         host: string;

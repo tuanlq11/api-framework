@@ -51,7 +51,9 @@ declare namespace framework {
 
         env: Environment;
 
-        log_level?: string;
+        log: {
+            level?: string;
+        }
 
         listen: {
             host: string;
@@ -121,14 +123,34 @@ declare namespace framework {
         error(message: any);
     }
 
-    class EurekaClient {
+    class MicroService {
         init(config: ConfigContract);
-        getInstance(): Eureka;
+        getInstance(): EurekaClient;
         start();
         stop();
+
+        service(name: string): Service | null;
     }
 
-    interface Eureka {
+    interface Service {
+        get(service: string, option?: Option);
+        post(service: string, option?: Option);
+        put(service: string, option?: Option);
+        delete(service: string, option?: Option);
+        patch(service: string, option?: Option);
+        delete(service: string, option?: Option);
+        option(service: string, option?: Option);
+    }
+
+    interface Option {
+        data?: any;
+        params?: any;
+        headers?: any;
+        timeout?: number;
+        auth?: any;
+    }
+
+    interface EurekaClient {
         constructor(config: any)
         start(): void;
         stop(): void;
@@ -251,14 +273,14 @@ declare namespace framework {
         abstract execute(command: any, callback?: Command.Callback): Promise<any>;
     }
 
-    abstract class SchemaCommandBus extends CommandBus{
+    abstract class SchemaCommandBus extends CommandBus {
 
     }
 
-    abstract class SchemaBrokerBus extends CommandBus{
+    abstract class SchemaBrokerBus extends CommandBus {
 
     }
-    
+
 }
 
 export = framework

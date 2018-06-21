@@ -1,4 +1,4 @@
-import { ConfigContract } from '../../app/config/ConfigContract';
+import { ConfigContract } from '../../config/ConfigContract';
 
 export abstract class MessageBroker {
 

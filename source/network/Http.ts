@@ -1,5 +1,4 @@
-/// <reference path="../typings/koa-route.d.ts" />
-/// <reference path="../typings/reflect-metadata.d.ts" />
+/// <reference types="reflect-metadata" />
 
 import { Handler } from 'koa-route';
 
@@ -20,7 +19,7 @@ function create(method: string) {
         return function annotate(target, key, desc: Descriptor) {
 
             const value = Reflect.getMetadata(HTTP_LIST, target);
-            const list  = (value as Annotation[]) || [];
+            const list = (value as Annotation[]) || [];
 
             const actuators = (global as any).actuators || {};
 
@@ -43,13 +42,13 @@ function create(method: string) {
 
 
 const Http = {
-    get:    create('get'),
-    head:   create('head'),
-    trace:  create('trace'),
+    get: create('get'),
+    head: create('head'),
+    trace: create('trace'),
     delete: create('delete'),
-    patch:  create('patch'),
-    post:   create('post'),
-    put:    create('put'),
+    patch: create('patch'),
+    post: create('post'),
+    put: create('put'),
 };
 
 
@@ -63,7 +62,7 @@ const HttpMetadata = {
         const result = {};
 
         for (const path in (global as any).actuators) {
-            const actuator                                                                                                                           = (global as any).actuators[path];
+            const actuator = (global as any).actuators[path];
             result[`{[/${appName.toLowerCase().concat(path)}],methods=[${actuator.methods.toString()}],produces=[${actuator.produces.toString()}]}`] = {};
         }
 

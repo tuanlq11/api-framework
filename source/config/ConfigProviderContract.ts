@@ -1,9 +1,16 @@
 import * as merge from "deepmerge";
+import { TextLogger as Logger } from '../system/impl/TextLogger';
 
 export abstract class ConfigProviderContract {
 
-    source: any;
-    content: any;
+    public source: any;
+    public content: any;
+
+    protected logger: Logger;
+
+    constructor() {
+        this.logger = new Logger();
+    }
 
     abstract load();
     abstract exists(key: string): boolean;

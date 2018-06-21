@@ -2,12 +2,9 @@
 
 
 import { ConfigProviderContract } from "../ConfigProviderContract";
-import { TextLogger } from "../../../system/impl/TextLogger";
 import * as merge from "deepmerge";
 
 export class EnvironmentProvider extends ConfigProviderContract {
-
-    private readonly logger = new TextLogger();
 
     async load() {
         this.parse(process.env);

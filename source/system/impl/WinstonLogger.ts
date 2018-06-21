@@ -1,5 +1,5 @@
 import { Logger } from '../Logger';
-import { ConfigContract as Config } from '../../app/config/ConfigContract';
+import { ConfigContract as Config } from '../../config/ConfigContract';
 import { autoInject } from '../../system/Injection';
 
 import * as winston from 'winston';
@@ -11,7 +11,7 @@ export class WinstonLogger extends Logger {
 
     constructor(readonly config: Config) {
         super();
-        const { 'log_level': level = 'info' } = config;
+        const { log: { level } } = config;
 
         const timestamp = () => { return new Date().toUTCString() };
         const formatter = (options) => {
@@ -37,7 +37,7 @@ export class WinstonLogger extends Logger {
     }
 
     debug(message: any, ...meta: any[]) {
-        this.logger.debug(message, ...meta, this.trace()[0]);
+        this.logger.debug(message, ...meta);
     }
 
     info(message: any, ...meta: any[]) {

@@ -2,17 +2,13 @@
 
 import * as path from "path";
 import { ConfigProviderContract } from "../ConfigProviderContract";
-import { TextLogger } from "../../../system/impl/TextLogger";
 
 export class StaticProvider extends ConfigProviderContract {
-
-    private readonly logger = new TextLogger();
 
     private path: string;
 
     async load() {
         
-        this.logger.debug(`Local Configuration: ${this.path}`);
         this.content = require(this.path);
         this.logger.info(`Local Configuration: Loaded`);
 

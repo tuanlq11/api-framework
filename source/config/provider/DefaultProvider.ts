@@ -7,6 +7,9 @@ export class DefaultProvider extends ConfigProviderContract {
     load() {
         this.content = {
             name: 'microservice',
+            log: {
+                level: 'info'
+            },
             listen: {
                 addr: '127.0.0.1',
                 port: 3020

@@ -4,7 +4,7 @@ import { autoInject } from '../../system/Injection';
 
 import * as uuid from 'uuid';
 
-import { ConfigContract } from '../../app/config/ConfigContract';
+import { ConfigContract } from '../../config/ConfigContract';
 import { MessageBroker } from '../../lib/message/MessageBroker';
 import { Logger } from '../../system/Logger'
 
