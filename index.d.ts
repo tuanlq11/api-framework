@@ -273,14 +273,19 @@ declare namespace framework {
         abstract execute(command: any, callback?: Command.Callback): Promise<any>;
     }
 
-    abstract class SchemaCommandBus extends CommandBus {
+    abstract class SchemaCommandBus extends CommandBus { }
+    abstract class SchemaBrokerBus extends CommandBus { }
 
+    function retry<T>(fn: () => Promise<T>, options: RetryOptionDict): Promise<T>
+
+    interface RetryOptionDict {
+        readonly logger: Logger;
+        readonly condition: string;
+        readonly delayTime: (attempt: number) => number;
+        readonly maxAttempts: number;
     }
 
-    abstract class SchemaBrokerBus extends CommandBus {
-
-    }
-
+    function isSandBox(): boolean;
 }
 
 export = framework

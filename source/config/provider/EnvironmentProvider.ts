@@ -1,8 +1,8 @@
 "use strict";
 
-
-import { ConfigProviderContract } from "../ConfigProviderContract";
-import * as merge from "deepmerge";
+import { ConfigProviderContract } from '../ConfigProviderContract';
+import * as camelcase from 'camelcase';
+import * as merge from 'deepmerge';
 
 export class EnvironmentProvider extends ConfigProviderContract {
 
@@ -27,7 +27,7 @@ export class EnvironmentProvider extends ConfigProviderContract {
         const key = keys.shift();
         if (!key) return val;
 
-        return { [key.toLowerCase()]: this.deepParse(keys, val) };
+        return { [camelcase(key)]: this.deepParse(keys, val) };
     }
 
     private parse(data: any) {
