@@ -285,7 +285,7 @@ declare namespace framework {
         readonly maxAttempts: number;
     }
 
-    function isSandBox(): boolean;
+    function sandBox(): boolean;
 }
 
 export = framework
