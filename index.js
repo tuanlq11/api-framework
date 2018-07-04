@@ -31,7 +31,5 @@ exportAll('./dist/cqrs/impl/SchemaBrokerBus');
 exportAll('./dist/config/ConfigFactory');
 exportAll('./dist/config/ConfigContract');
 
-exportAll('./dist/network/MicroService');
-
 exportAll('./dist/lib/message/impl/RabbitMQ');
 exportAll('./dist/lib/message/MessageBroker');

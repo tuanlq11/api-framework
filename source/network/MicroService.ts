@@ -40,20 +40,25 @@ export class MicroService {
             registry: { eureka: { instance, server } }
         } = config;
 
+        const hostName = instance.host || listen.host;
+        const ipAddr = instance.addr || listen.addr;
+        const port = instance.port || listen.port;
+
         this.client = new Client({
             logger,
             instance: {
-                instanceId, app,
-                hostName: instance.host || listen.host,
-                ipAddr: instance.addr || listen.addr,
+                instanceId, app, hostName, ipAddr,
                 port: {
-                    '$': instance.port || listen.port,
+                    '$': port,
                     '@enabled': true,
                 },
                 vipAddress: app.toLowerCase(),
                 dataCenterInfo: {
                     '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
                     name: 'MyOwn',
+                },
+                metadata: {
+                    'management.port': port
                 },
                 homePageUrl: homePageUrl.concat('/'),
                 healthCheckUrl: homePageUrl.concat('/', 'health'),

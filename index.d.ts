@@ -123,15 +123,6 @@ declare namespace framework {
         error(message: any);
     }
 
-    class MicroService {
-        init(config: ConfigContract);
-        getInstance(): EurekaClient;
-        start();
-        stop();
-
-        service(name: string): Service | null;
-    }
-
     interface Service {
         get(service: string, option?: Option);
         post(service: string, option?: Option);
@@ -211,13 +202,18 @@ declare namespace framework {
     }
 
     abstract class Logger {
+
+        public filename: string;
+
         abstract debug(message: any): void;
         abstract info(message: any): void;
         abstract warn(message: any): void;
         abstract error(message: any): void;
+
+        query(options: any);
     }
 
-    abstract class JsonLogger implements Logger { }
+    abstract class JsonLogger extends Logger { }
     abstract class WinstonLogger extends Logger { }
     abstract class TextLogger extends Logger { }
 
@@ -238,6 +234,7 @@ declare namespace framework {
 
     abstract class Router {
         middleware();
+        register(controller);
     }
 
     namespace Command {
@@ -286,6 +283,18 @@ declare namespace framework {
     }
 
     function sandBox(): boolean;
+
+    class Controller { }
+
+    abstract class Http {
+        static get(path);
+        static head(path);
+        static trace(path);
+        static delete(path);
+        static patch(path);
+        static post(path);
+        static put(path);
+    }
 }
 
 export = framework

@@ -12,6 +12,10 @@ export abstract class ConfigContract {
         level?: LogLevel;
     }
 
+    data: {
+        dir: string
+    }
+
     listen: {
         host: string;
         addr: string;

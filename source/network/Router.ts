@@ -1,67 +1,49 @@
 import * as compose from 'koa-compose';
-import * as methods from 'koa-route';
+import * as Origin from 'koa-router';
 
 import { json as parse } from 'co-body';
-import { Context, Next } from 'koa';
+import { Context } from 'koa';
 
 import { HttpMetadata } from './Http';
 
-interface Handler {
-	(context: Context, ...args: string[]): void | Promise<void>
-}
-
-interface Route {
-	handler: Handler;
-	method: string;
-	path: string;
-}
-
-
 export class Router {
 
-	private readonly routes: Route[];
+	private readonly router: Origin;
 
 	constructor() {
-		this.routes = [];
+		this.router = new Origin();
 	}
 
 	register(controller) {
 		const annotations = HttpMetadata.get(controller);
 
-		const routes = annotations.map(item => ({
-			handler: controller[item.property].bind(controller),
-			method: item.httpMethod,
-			path: item.routePath,
-		} as Route));
+		for (const route of annotations) {
+			const handler = controller[route.property].bind(controller);
 
-		this.routes.push(...routes);
+			this.router[route.httpMethod](route.routePath, handler);
+		}
 	}
-
 
 	getRoutes() {
-		return this.routes;
+		return this.router.routes();
 	}
 
-
 	middleware() {
-		const stack = this.routes.map(route => {
-			return methods[route.method](route.path, route.handler);
-		});
-		return compose([parseBody, awaitBody, ...stack]);
+		return compose([parseBody, awaitBody, this.getRoutes(), this.router.allowedMethods()]);
 	}
 
 }
 
 
-async function parseBody(context: Context, next: Next) {
+async function parseBody(context: Context, next: Function) {
 	if (context.is('json')) {
-		context.request.body = await parse(context);
+		context.request['body'] = await parse(context);
 	}
 	await next();
 }
 
 
-async function awaitBody(context: Context, next: Next) {
+async function awaitBody(context: Context, next: Function) {
 	await next();
 	if (context.body && context.body.then) {
 		context.body = await context.body;
