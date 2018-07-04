@@ -1,7 +1,5 @@
 /// <reference types="reflect-metadata" />
 
-// import { Handler } from 'koa-route';
-
 const HTTP_LIST = Symbol('http:list');
 
 
@@ -14,17 +12,15 @@ interface Annotation {
 
 type Descriptor = TypedPropertyDescriptor<Function>;
 
-function create(method: string) {
-    return function factory(path: string, produces?: string) {
-        return function annotate(target, key, desc: Descriptor) {
+function create(httpMethod: string) {
+    return function factory(routePath: string) {
+        return function annotate(target, property) {
 
             const value = Reflect.getMetadata(HTTP_LIST, target);
-            const list = (value as Annotation[]) || [];
+            const list = (value as Map<String, Annotation>) || new Map<String, Annotation>();
 
-            list.push({ httpMethod: method, routePath: path, property: key });
-
+            list.set(property, { httpMethod, routePath, property });
             Reflect.defineMetadata(HTTP_LIST, list, target);
-
         };
 
     };
@@ -45,20 +41,9 @@ const Http = {
 
 const HttpMetadata = {
 
-    get(target): Annotation[] {
+    get(target): Map<String, Annotation> {
         return Reflect.getMetadata(HTTP_LIST, target);
-    },
-
-    actuators: (appName: string) => {
-        const result = {};
-
-        for (const path in (global as any).actuators) {
-            const actuator = (global as any).actuators[path];
-            result[`{[/${appName.toLowerCase().concat(path)}],methods=[${actuator.methods.toString()}],produces=[${actuator.produces.toString()}]}`] = {};
-        }
-
-        return result;
-    },
+    }
 
 };
 

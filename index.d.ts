@@ -284,8 +284,6 @@ declare namespace framework {
 
     function sandBox(): boolean;
 
-    class Controller { }
-
     abstract class Http {
         static get(path);
         static head(path);
@@ -294,6 +292,16 @@ declare namespace framework {
         static patch(path);
         static post(path);
         static put(path);
+    }
+
+    abstract class HttpMetadata {
+        static get(target): Map<String, Annotation>;
+    }
+
+    interface Annotation {
+        httpMethod: string;
+        routePath: string;
+        property: any;
     }
 }
 

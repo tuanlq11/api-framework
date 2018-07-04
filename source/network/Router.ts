@@ -6,6 +6,9 @@ import { Context } from 'koa';
 
 import { HttpMetadata } from './Http';
 
+const ROUTE_PREFIX = Symbol('route:prefix');
+
+
 export class Router {
 
 	private readonly router: Origin;
@@ -17,7 +20,7 @@ export class Router {
 	register(controller) {
 		const annotations = HttpMetadata.get(controller);
 
-		for (const route of annotations) {
+		for (const route of annotations.values()) {
 			const handler = controller[route.property].bind(controller);
 
 			this.router[route.httpMethod](route.routePath, handler);

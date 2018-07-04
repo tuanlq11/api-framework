@@ -1,4 +1,11 @@
-import * as Koa from 'koa';
+import * as Origin from 'koa';
 
-export { Koa };
+export class Koa extends Origin {
+
+    constructor(){
+        super();
+    }
+
+}
+
 export { Context, Middleware } from 'koa';

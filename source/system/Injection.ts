@@ -46,7 +46,6 @@ function bootstrap<T>(target: Type<T>, providers: any[]): T {
 	]);
 	
 	return injector.get(target);
-
 }
 
 function findParamTypes(target: Provide<any>): any[] {
