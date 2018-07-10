@@ -33,3 +33,5 @@ exportAll('./dist/config/ConfigContract');
 
 exportAll('./dist/lib/message/impl/RabbitMQ');
 exportAll('./dist/lib/message/MessageBroker');
+
+exportAll('./dist/system/Controller');

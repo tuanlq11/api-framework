@@ -5,25 +5,32 @@ import { json as parse } from 'co-body';
 import { Context } from 'koa';
 
 import { HttpMetadata } from './Http';
+import { Logger } from '../system/Logger';
+import { autoInject } from '../system/Injection';
 
-const ROUTE_PREFIX = Symbol('route:prefix');
+const PREFIX = Symbol('route:prefix');
 
-
+@autoInject
 export class Router {
 
 	private readonly router: Origin;
 
-	constructor() {
+	constructor(readonly logger: Logger) {
 		this.router = new Origin();
 	}
 
 	register(controller) {
 		const annotations = HttpMetadata.get(controller);
 
+		const prefix = Prefix.get(controller);
+
 		for (const route of annotations.values()) {
+			const path = `${prefix}${route.routePath}`;
 			const handler = controller[route.property].bind(controller);
 
-			this.router[route.httpMethod](route.routePath, handler);
+			this.logger.debug(`[${route.httpMethod.toUpperCase()}] ${path}`);
+
+			this.router[route.httpMethod](path, handler);
 		}
 	}
 
@@ -37,6 +44,14 @@ export class Router {
 
 }
 
+const Prefix = {
+	set(target, prefix) {
+		Reflect.defineMetadata(PREFIX, prefix, target);
+	},
+	get(target) {
+		return Reflect.getMetadata(PREFIX, target) || '';
+	}
+}
 
 async function parseBody(context: Context, next: Function) {
 	if (context.is('json')) {
@@ -52,3 +67,5 @@ async function awaitBody(context: Context, next: Function) {
 		context.body = await context.body;
 	}
 }
+
+export { Prefix }

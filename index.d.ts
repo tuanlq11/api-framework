@@ -284,25 +284,32 @@ declare namespace framework {
 
     function sandBox(): boolean;
 
-    abstract class Http {
-        static get(path);
-        static head(path);
-        static trace(path);
-        static delete(path);
-        static patch(path);
-        static post(path);
-        static put(path);
+    namespace HttpMetadata {
+        function get(target): Map<String, Annotation>;
+
+        interface Annotation {
+            httpMethod: string;
+            routePath: string;
+            property: any;
+        }
     }
 
-    abstract class HttpMetadata {
-        static get(target): Map<String, Annotation>;
+    namespace Http {
+        function get(path);
+        function del(path);
+        function patch(path);
+        function post(path);
+        function put(path);
+        function all(path);
     }
 
-    interface Annotation {
-        httpMethod: string;
-        routePath: string;
-        property: any;
+    function Controller(prefix?: string)
+
+    namespace Prefix {
+        function set(target, path);
+        function get(target);
     }
+
 }
 
 export = framework

@@ -41,11 +41,11 @@ function bootstrap<T>(target: Type<T>, providers: any[]): T {
 	const implProviders = _.flatMap(knownProviders, getImplClasses);
 	const concreteProviders = _.differenceWith(knownProviders, implProviders, _.isEqual);
 	
-	const injector = Injector.create([
+	(<any>global).__injector = Injector.create([
 		concreteProviders, implProviders, providers
 	]);
-	
-	return injector.get(target);
+
+	return (<any>global).__injector.get(target);
 }
 
 function findParamTypes(target: Provide<any>): any[] {

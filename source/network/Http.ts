@@ -9,11 +9,10 @@ interface Annotation {
     property: any;
 }
 
-
-type Descriptor = TypedPropertyDescriptor<Function>;
-
 function create(httpMethod: string) {
+
     return function factory(routePath: string) {
+
         return function annotate(target, property) {
 
             const value = Reflect.getMetadata(HTTP_LIST, target);
@@ -21,21 +20,20 @@ function create(httpMethod: string) {
 
             list.set(property, { httpMethod, routePath, property });
             Reflect.defineMetadata(HTTP_LIST, list, target);
+
         };
 
     };
 
 }
 
-
 const Http = {
     get: create('get'),
-    head: create('head'),
-    trace: create('trace'),
-    delete: create('delete'),
-    patch: create('patch'),
     post: create('post'),
-    put: create('put')
+    patch: create('patch'),
+    put: create('put'),
+    del: create('delete'),
+    all: create('all')
 };
 
 
