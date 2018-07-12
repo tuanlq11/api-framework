@@ -310,6 +310,11 @@ declare namespace framework {
         function get(target);
     }
 
+    abstract class Unauthorized { }
+    abstract class Forbidden { }
+    abstract class NotFound { }
+    abstract class InvalidCommand { }
+
 }
 
 export = framework
