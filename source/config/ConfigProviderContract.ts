@@ -4,7 +4,7 @@ import { TextLogger as Logger } from '../system/impl/TextLogger';
 export abstract class ConfigProviderContract {
 
     public source: any;
-    public content: any;
+    public content: any = {};
 
     protected logger: Logger;
 

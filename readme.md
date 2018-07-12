@@ -1,5 +1,0 @@
-
-API Framework
-=============
-
-$ npm test

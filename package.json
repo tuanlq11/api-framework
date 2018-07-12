@@ -1,11 +1,15 @@
 {
   "name": "api-framework",
+  "private": true,
   "version": "2.0.0",
+  "description": "EXE API Framework",
   "scripts": {
     "pretest": "tsc --project tests --outDir dist-root",
     "test": "mocha --async-only --bail --ui qunit dist-root/tests",
     "postinstall": "tsc --project source --outDir dist"
   },
+  "author": "EXE",
+  "license": "ISC",
   "engines": {
     "node": ">=8.11.3"
   },
