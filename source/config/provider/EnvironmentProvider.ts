@@ -23,8 +23,8 @@ export class EnvironmentProvider extends ConfigProviderContract {
         return this.content;
     }
 
-    private deepParse(keys: string[], val: string) {
-        const key = keys.shift();
+    private deepParse(keys: string[], val: string | string[]) {
+        let key = keys.shift();
         if (!key) return val;
 
         return { [camelcase(key)]: this.deepParse(keys, val) };
@@ -36,8 +36,18 @@ export class EnvironmentProvider extends ConfigProviderContract {
             const prefix = keys.shift();
             if (!prefix || prefix !== 'APP') continue;
 
-            this.content = merge(this.content, this.deepParse(keys, data[envKey]));
+            const val = arrayData(data[envKey]);
+
+            this.content = merge(this.content, this.deepParse(keys, val));
         }
     }
+
+
+}
+
+function arrayData(val: string): string | string[] {
+    const separated = val.match(/[^[\]]+(?=])/g);
+
+    return separated ? separated[0].split(',') : val;
 }
 

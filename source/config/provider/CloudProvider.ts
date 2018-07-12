@@ -29,7 +29,7 @@ export class CloudProvider extends ConfigProviderContract {
                     resolve();
                 }
 
-                this.parse(body.propertySources);
+                this.parse(body.propertySources || {});
                 this.logger.info('Remote Configuration: Successful');
                 resolve(this);
             })
