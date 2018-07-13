@@ -159,7 +159,7 @@ declare namespace framework {
         res: object;
         respond: boolean;
 
-        request: Request;
+        request: IRequest;
         response: Response;
 
         cookies: object;
@@ -184,6 +184,10 @@ declare namespace framework {
 
         set(field: string, value: string): void;
 
+    }
+
+    interface IRequest extends Request {
+        query: any;
     }
 
     interface Next {
